@@ -1,0 +1,27 @@
+::Written by xizhi
+根据对应 系统/版本 ,把每行命令复制到 CMD/终端 执行即可
+
+Windows:
+Python2/3:
+python -m ensurepip
+python -m pip install requests
+
+MAC OS: (可能会提示安装 cc 命令工具,安装即可)
+Python2:
+python -m ensurepip
+python -m pip install requests
+
+Python3:
+python3 -m ensurepip
+python3 -m pip install requests
+
+Ubuntu: (其它Linux系统自行搜索方法)
+Python2:
+sudo apt-get update
+sudo apt-get install python-tk
+sudo apt-get install python-requests
+
+Python3:
+sudo apt-get update
+sudo apt-get install python3-tk
+sudo apt-get install python3-requests
