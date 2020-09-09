@@ -8,7 +8,6 @@ import requests
 import linecache
 import time
 import tkinter.messagebox
-import json
 
 def AllinOneExit1():
   print("程序5秒后自动退出")
@@ -209,10 +208,10 @@ class Citic3651():
       if re.findall("Citic3651的商品 %s.*\.ordered"%(citic365skun1),str(files),flags=re.I):
         print("该Citic3651的商品: %s 已下单成功了,如果需要再次下单,请先删除目录下对应的.ordered文件"%(citic365skun1))
         AllinOneExit1()
+    citic365data1 = {"skuId":"%s"%(citic365skuid1),"skuNum":1}
     try:
-      citic365data1 = {"skuId":"%s"%(citic365skuid1),"skuNum":1}
       self.Citic365GetOrders1()
-    except json.decoder.JSONDecodeError:
+    except ValueError:
       print("可能登录状态失效了,请先尝试重新获取Cookie,之后还提示这个的话就是程序有问题了")
       AllinOneExit1()
     if re.findall(r"不在抢购时间内",citic365orders1) != []:
@@ -224,7 +223,7 @@ class Citic3651():
     self.Citic365Ordering1()
     
 def AllinOneMain1():
-  funcl = ["1 联通超级星期五(每周五10点和16点)","2 中信365(每周三周六11点)","3 中行电子券(每周二10点)"]
+  funcl = ["1 联通超级星期五(每周五10点和16点)","2 中信365(每周三周六11点)","3 中行RMB电子券(每周二10点)","4 中行99积分电子券(每周四10点)"]
   print("\n\n".join(funcl))
   funcsel = input("\n请输入对应数字然后按确定:")
   if funcsel == "" or funcsel == "0":
@@ -240,6 +239,9 @@ def AllinOneMain1():
     elif int(funcsel) == 3:
       print("等待整合中\n")
       AllinOneExit1()
+    elif int(funcsel) == 4:
+      print("等待整合中\n")
+      AllinOneExit1()
   else:
     print("请输入仅列出的数字,1秒后重新输入")
     time.sleep(1)
@@ -250,13 +252,13 @@ unifrilines1 = len(open(r"unifri1cfg.set",errors="ignore",encoding="UTF-8").read
 if unifrilines1 != 34:
   tkinter.messagebox.showerror("出错了","unifri1cfg.set的行数不对哦\n按确定后自动退出")
   os._exit(0)
-linecache.updatecache("unifri1cfg.set")
 
 citic365lines1 = len(open(r"citic3651cfg.set",errors="ignore",encoding="UTF-8").readlines())
 if citic365lines1 != 24:
   tkinter.messagebox.showerror("出错了","citic3651cfg.set的行数不对哦\n按确定后自动退出")
   os._exit(0)
+del unifrilines1,citic365lines1
+linecache.updatecache("unifri1cfg.set")
 linecache.updatecache("citic3651cfg.set")
 
-del unifrilines1,citic365lines1
 AllinOneMain1()
