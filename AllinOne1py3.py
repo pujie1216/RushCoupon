@@ -273,18 +273,8 @@ citic365lines1 = len(open(r"citic3651cfg.set",errors="ignore",encoding="UTF-8").
 if citic365lines1 != 24:
   tkinter.messagebox.showerror("出错了","citic3651cfg.set的行数不对哦\n按确定后自动退出")
   os._exit(0)
-bocmclines1 = len(open(r"bocmc1cfg.set",errors="ignore",encoding="UTF-8").readlines())
-if bocmclines1 != 31:
-  tkinter.messagebox.showerror("出错了","bocmc1cfg.set的行数不对哦\n按确定后自动退出")
-  os._exit(0)
-bocpclines1 = len(open(r"bocpc1cfg.set",errors="ignore",encoding="UTF-8").readlines())
-if bocpclines1 != 35:
-  tkinter.messagebox.showerror("出错了","bocpc1cfg.set的行数不对哦\n按确定后自动退出")
-  os._exit(0)
-del unifrilines1,citic365lines1,bocmclines1,bocpclines1
 linecache.updatecache("unifri1cfg.set")
 linecache.updatecache("citic3651cfg.set")
-linecache.updatecache("bocmc1cfg.set")
-linecache.updatecache("bocpc1cfg.set")
+
 
 AllinOneMain1()
