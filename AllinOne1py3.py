@@ -27,7 +27,7 @@ class Unifri1():
     global unifrigoodsn1,unifrigoodsid1,unifripaypri1
     try:
       unifrigoodsidq1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/get619Activity/v1?whetherFriday=YES",cookies=unifricookies1,headers=unifriheaders1,timeout=3).json()
-    except requests.exceptions.Timeout:
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
       self.UnifriNetGoods1()
     if re.findall(r"未登录",str(unifrigoodsidq1)) != []:
       print("返回信息: "+unifrigoodsidq1["msg"]+"\n联通登录状态失效了,请重新获取Cookie")
@@ -92,7 +92,7 @@ class Unifri1():
       global unifriorders1
       unifriorderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/api/bj2402/v1",headers=unifriheaders1,params=unifridata1,cookies=unifricookies1,timeout=float(linecache.getline(r"unifri1cfg.set",28).strip())).json()
       unifriorders1 = unifriorderj1["msg"]
-    except requests.exceptions.Timeout:
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
       self.UnifriGetOrders1()
 
   def UnifriGettime1(self):
@@ -100,7 +100,7 @@ class Unifri1():
       global unifritime1
       unifritimes1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/getCurrentTimeMillis/v2",headers=unifriheaders1,timeout=3).json()["resdata"]["currentTime"]
       unifritime1 = time.strftime("%H:%M:%S",time.localtime(unifritimes1/1000))
-    except requests.exceptions.Timeout:
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
       self.UnifriGettime1()
 
   def UnifriOrdering1(self):
@@ -133,14 +133,14 @@ class Unifri1():
         times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
         requests.get("https://sc.ftqq.com/%s.send?text=%s %s 下单成功,请尽快在30分钟内支付,逾期将失效哦"%(linecache.getline(r"unifri1cfg.set",33).strip(),times,unifrigoodsn1))
       AllinOneExit1()
-    except requests.exceptions.Timeout:
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
       self.UnifriOrdering1()
   
   def UnifriMain1(self):
     global unifriheaders1,unifricookies1,unifridata1
     rechangeno1 = linecache.getline(r"unifri1cfg.set",22).strip()
     print("正在运行联通超级星期五\n当前配置的对应手机号为: %s\n"%(rechangeno1))
-    unifriheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36"}
+    unifriheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36; unicom{version:android@7.0500}"}
     unifricookies1 = {"Cookies":"%s"%(linecache.getline(r"unifri1cfg.set",36).strip())}
     if int(linecache.getline(r"unifri1cfg.set",18).strip()) == 1:
       self.UnifriLocalGoods1()
@@ -239,7 +239,6 @@ class Citic3651():
         AllinOneExit1()
     self.Citic365Ordering1()
 
-
 def AllinOneMain1():
   funcl = ["1 联通超级星期五 (每周五10点和16点)","2 中信365 (每周三周六11点)","3 中行RMB电子券 (每周二10点)","4 中行99积分电子券 (每周四10点)"]
   print("\n\n".join(funcl))
@@ -274,8 +273,18 @@ citic365lines1 = len(open(r"citic3651cfg.set",errors="ignore",encoding="UTF-8").
 if citic365lines1 != 24:
   tkinter.messagebox.showerror("出错了","citic3651cfg.set的行数不对哦\n按确定后自动退出")
   os._exit(0)
-del unifrilines1,citic365lines1
+bocmclines1 = len(open(r"bocmc1cfg.set",errors="ignore",encoding="UTF-8").readlines())
+if bocmclines1 != 31:
+  tkinter.messagebox.showerror("出错了","bocmc1cfg.set的行数不对哦\n按确定后自动退出")
+  os._exit(0)
+bocpclines1 = len(open(r"bocpc1cfg.set",errors="ignore",encoding="UTF-8").readlines())
+if bocpclines1 != 35:
+  tkinter.messagebox.showerror("出错了","bocpc1cfg.set的行数不对哦\n按确定后自动退出")
+  os._exit(0)
+del unifrilines1,citic365lines1,bocmclines1,bocpclines1
 linecache.updatecache("unifri1cfg.set")
 linecache.updatecache("citic3651cfg.set")
+linecache.updatecache("bocmc1cfg.set")
+linecache.updatecache("bocpc1cfg.set")
 
 AllinOneMain1()
