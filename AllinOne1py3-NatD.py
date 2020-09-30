@@ -32,34 +32,35 @@ class Unifri1():
     if re.findall(r"未登录",str(unifrigoodsq1)) != []:
       print("返回信息: "+unifrigoodsq1["msg"]+"\n联通登录状态失效了,请重新获取Cookie")
       AllinOneExit1()
+    unifriactL1 = unifrigoodsq1["resdata"]["activityList"]
     unifrigoodsnl1 = []
+    unifrigoodsnl11 = []
     unifrigoodsidl1 = []
     unifripaypril1 = []
     a = 0
-    for b in range(0,len(unifrigoodsq1["resdata"]["activityList"])):
-      for i,goods in enumerate(unifrigoodsq1["resdata"]["activityList"][b]["goodsList"],a+1):
-        unifrigoodsnl1.append(str(i)+" "+unifrigoodsq1["resdata"]["activityList"][b]["navClock"]+" "+\
-                                            goods["goodsName"])
+    unifristate1 = {"10":"立即抢购","20":"去查看","30":"","40":"已抢光","50":"未开始"}
+    for b in range(0,len(unifriactL1)):
+      for i,goods in enumerate(unifriactL1[b]["goodsList"],a+1):
+        unifrigoodsnl11.append(str(i)+" "+unifriactL1[b]["navClock"]+\
+                              unifristate1.get(goods["state"])+" "+goods["goodsName"])
+        unifrigoodsnl1.append(goods["goodsName"])
       a = i
-      for goods in unifrigoodsq1["resdata"]["activityList"][b]["goodsList"]:
+      for goods in unifriactL1[b]["goodsList"]:
         unifrigoodsidl1.append(goods["goodsId"])
-      for goods in unifrigoodsq1["resdata"]["activityList"][b]["goodsList"]:
+      for goods in unifriactL1[b]["goodsList"]:
         unifripaypril1.append(goods["price"]+"0")
     if re.findall(r"legalRightGoodsList",str(unifrigoodsq1),flags=re.I) != []:
       for i,goods in enumerate(unifrigoodsq1["resdata"]["legalRightGoodsList"],i+1):
         unifrigoodsnl1.append(str(i)+" "+goods["gOODS_NAME"]) 
       for goods in unifrigoodsq1["resdata"]["legalRightGoodsList"]:
         unifrigoodsidl1.append(goods["gOODS_SKU_ID"])
-    unifrigoodsn1 = "\n".join(unifrigoodsnl1)
+    unifrigoodsn1 = "\n".join(unifrigoodsnl11)
     print(unifrigoodsq1["msg"]+"\n\n"+unifrigoodsn1)
     unifrigoodss1 = input("\n请输入对应的数字选择商品:")
     if unifrigoodss1 == "" or unifrigoodss1 == "0":
       unifrigoodss1 = 1
     try:
-      if unifrigoodsq1["resdata"]["activityList"][b]["navClock"] == "":
-        unifrigoodsn1 = unifrigoodsnl1[int(unifrigoodss1)-1][2:]
-      else:
-        unifrigoodsn1 = unifrigoodsnl1[int(unifrigoodss1)-1][8:]
+      unifrigoodsn1 = unifrigoodsnl1[int(unifrigoodss1)-1]
       unifrigoodsid1 = unifrigoodsidl1[int(unifrigoodss1)-1]
       unifripaypri1 = unifripaypril1[int(unifrigoodss1)-1]
       print("已选择商品名称: %s\n对应的商品ID: %s\n对应的商品价格: %s\n"\
@@ -224,7 +225,7 @@ class Citic3651():
       while re.findall(r"[^处理成功]",citic365orders1) != []:
         print("返回信息: %s\n没有下单成功,将在%s秒后第%s次刷新"%(citic365orders1,citic365ftime1,citic365ftimes1))
         self.Citic365GetOrders1()
-        if re.findall(r"处理成功",citic365orders1) != []:
+        if re.findall(r"下单成功",citic365orders1) != []:
           break
         time.sleep(float(citic365ftime1))
         citic365ftimes1 += 1
