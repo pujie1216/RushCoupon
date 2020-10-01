@@ -42,18 +42,21 @@ class Unifri1():
     for b in range(0,len(unifriactL1)):
       for i,goods in enumerate(unifriactL1[b]["goodsList"],a+1):
         unifrigoodsnl11.append(str(i)+" "+unifriactL1[b]["navClock"]+\
-                              unifristate1.get(goods["state"])+" "+goods["goodsName"])
+                                              unifristate1.get(goods["state"])+" "+goods["goodsName"])
         unifrigoodsnl1.append(goods["goodsName"])
       a = i
       for goods in unifriactL1[b]["goodsList"]:
         unifrigoodsidl1.append(goods["goodsId"])
       for goods in unifriactL1[b]["goodsList"]:
         unifripaypril1.append(goods["price"]+"0")
-    if re.findall(r"legalRightGoodsList",str(unifrigoodsq1),flags=re.I) != []:
-      for i,goods in enumerate(unifrigoodsq1["resdata"]["legalRightGoodsList"],i+1):
-        unifrigoodsnl1.append(str(i)+" "+goods["gOODS_NAME"]) 
-      for goods in unifrigoodsq1["resdata"]["legalRightGoodsList"]:
-        unifrigoodsidl1.append(goods["gOODS_SKU_ID"])
+    if re.findall(r"fourNineGoodsList",str(unifrigoodsq1),flags=re.I) != []:
+      for i,goods in enumerate(unifrigoodsq1["resdata"]["fourNineGoodsList"],i+1):
+        unifrigoodsnl11.append(str(i)+" "+unifristate1.get(goods["state"])+" "+goods["goodsName"])
+        unifrigoodsnl1.append(goods["goodsName"])
+      for goods in unifrigoodsq1["resdata"]["fourNineGoodsList"]:
+        unifrigoodsidl1.append(goods["goodsId"])
+      for goods in unifrigoodsq1["resdata"]["fourNineGoodsList"]:
+        unifripaypril1.append(goods["price"]+"0")
     unifrigoodsn1 = "\n".join(unifrigoodsnl11)
     print(unifrigoodsq1["msg"]+"\n\n"+unifrigoodsn1)
     unifrigoodss1 = input("\n请输入对应的数字选择商品:")
@@ -137,7 +140,7 @@ class Unifri1():
             self.UnifriGettime1()
             time.sleep(0.01)
           time.sleep(float(linecache.getline(r"unifri1cfg.set",17).strip()))
-      while re.findall(r"[^(下单成功|此商品你已达到购买数量限制了~)]",unifriorders1) != []:
+      while re.findall(r"[^下单成功]",unifriorders1) != []:
         print("返回信息: %s\n没有下单成功,将在%s秒后第%s次刷新"%(unifriorders1,unifriftime1,unifriftimes1))
         self.UnifriGetOrders1()
         if re.findall(r"下单成功",unifriorders1) != []:
@@ -188,7 +191,7 @@ class Unifri1():
       unifriask1 = input()
       if unifriask1.lower() == "e":
         AllinOneExit1()
-    elif re.findall(r"达到上限",unifriorders1) != []:
+    elif re.findall(r"达到上限|数量限制|次数限制",unifriorders1) != []:
       print("返回信息: "+unifriorders1)
       print("该账号已不能再次购买\n")
       AllinOneExit1()
@@ -225,7 +228,7 @@ class Citic3651():
       while re.findall(r"[^处理成功]",citic365orders1) != []:
         print("返回信息: %s\n没有下单成功,将在%s秒后第%s次刷新"%(citic365orders1,citic365ftime1,citic365ftimes1))
         self.Citic365GetOrders1()
-        if re.findall(r"下单成功",citic365orders1) != []:
+        if re.findall(r"处理成功",citic365orders1) != []:
           break
         time.sleep(float(citic365ftime1))
         citic365ftimes1 += 1
