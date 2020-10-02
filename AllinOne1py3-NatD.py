@@ -27,7 +27,7 @@ class Unifri1():
     try:
       unifrigoodsq1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/get619Activity/v1?whetherFriday=YES",
                                                     cookies=unifricookies1,headers=unifriheaders1,timeout=3).json()
-    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
       self.UnifriNetGoods1()
     if re.findall(r"未登录",str(unifrigoodsq1)) != []:
       print("返回信息: "+unifrigoodsq1["msg"]+"\n联通登录状态失效了,请重新获取Cookie")
@@ -111,9 +111,9 @@ class Unifri1():
     try:
       global unifritime1
       unifritimes1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/getCurrentTimeMillis/v2",
-                                                headers=unifriheaders1,timeout=3).json()["resdata"]["currentTime"]
+                                                headers=unifriheaders1,timeout=1).json()["resdata"]["currentTime"]
       unifritime1 = time.strftime("%H:%M:%S",time.localtime(unifritimes1/1000))
-    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
       self.UnifriGettime1()
 
   def UnifriOrdering1(self):
@@ -126,24 +126,37 @@ class Unifri1():
           print("请勿关闭,程序将在10点0秒开抢")
           while unifritime1 < "10:00:00":
             self.UnifriGettime1()
-            time.sleep(0.01)
+            if unifritime1 < "09:59:00":
+              time.sleep(30)
+            else:
+              time.sleep(0.01)
           time.sleep(float(linecache.getline(r"unifri1cfg.set",17).strip()))
         elif unifritime1 > "11:30:00" and unifritime1 < "12:00:00":
           print("请勿关闭,程序将在12点0秒开抢")
           while unifritime1 < "12:00:00":
             self.UnifriGettime1()
-            time.sleep(0.01)
+            if unifritime1 > "11:30:00" and unifritime1 < "11:59:00":
+              time.sleep(30)
+            else:
+              time.sleep(0.01)
           time.sleep(float(linecache.getline(r"unifri1cfg.set",17).strip()))
         elif unifritime1 > "15:30:00" and unifritime1 < "16:00:00":
           print("请勿关闭,程序将在16点0秒开抢")
           while unifritime1 < "16:00:00":
             self.UnifriGettime1()
-            time.sleep(0.01)
+            if unifritime1 > "15:30:00" and unifritime1 < "15:59:00":
+              time.sleep(30)
+            else:
+              time.sleep(0.01)
           time.sleep(float(linecache.getline(r"unifri1cfg.set",17).strip()))
-      while re.findall(r"[^下单成功]",unifriorders1) != []:
+      while re.findall(r"下单成功",unifriorders1) == []:
         print("返回信息: %s\n没有下单成功,将在%s秒后第%s次刷新"%(unifriorders1,unifriftime1,unifriftimes1))
         self.UnifriGetOrders1()
-        if re.findall(r"下单成功",unifriorders1) != []:
+        if re.findall(r"达到上限|数量限制|次数限制",unifriorders1) != []:
+          print("返回信息: "+unifriorders1)
+          print("该账号已有订单,不能再次购买\n")
+          AllinOneExit1()
+        elif re.findall(r"下单成功",unifriorders1) != []:
           break
         time.sleep(float(unifriftime1))
         unifriftimes1 += 1
@@ -156,7 +169,7 @@ class Unifri1():
         requests.get("https://sc.ftqq.com/%s.send?text=%s %s 下单成功,请尽快在30分钟内支付,逾期将失效哦"\
                             %(linecache.getline(r"unifri1cfg.set",35).strip(),times,unifrigoodsn1))
       AllinOneExit1()
-    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
       self.UnifriOrdering1()
   
   def UnifriMain1(self):
@@ -193,7 +206,7 @@ class Unifri1():
         AllinOneExit1()
     elif re.findall(r"达到上限|数量限制|次数限制",unifriorders1) != []:
       print("返回信息: "+unifriorders1)
-      print("该账号已不能再次购买\n")
+      print("该账号已有订单,不能再次购买\n")
       AllinOneExit1()
     self.UnifriOrdering1()
     
@@ -275,8 +288,8 @@ class Citic3651():
 def AllinOneMain1():
   funcl = ["1 联通超级星期五 - 国庆节特供",
                "2 中信365 (每周三周六11点)",
-               "3 中行RMB电子券 (每周二10点)",
-               "4 中行99积分电子券 (每周四10点)",
+               "3 中行RMB电子券 微信端 (每周二10点)",
+               "4 中行99积分电子券 微信端 (每周四10点)",
                "5 龙卡星期六 (每周六11点)"]
   print("功能选择:\n\n"+"\n\n".join(funcl))
   funcsel = input("\n更多整合等待发现,欢迎回复提供\n\n请输入对应数字然后按确定:")
