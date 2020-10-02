@@ -23,7 +23,7 @@ def AllinOneClear1():
       
 class Unifri1():
   def UnifriNetGoods1(self):
-    global unifrigoodsn1,unifrigoodsid1,unifripaypri1
+    global unifrigoodsn1,unifrigoodsid1,unifripaypri1,unifrigoodsbt1
     try:
       unifrigoodsq1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/get619Activity/v1?whetherFriday=YES",
                                                     cookies=unifricookies1,headers=unifriheaders1,timeout=3).json()
@@ -37,13 +37,18 @@ class Unifri1():
     unifrigoodsnl11 = []
     unifrigoodsidl1 = []
     unifripaypril1 = []
+    unifrigoodsbtl1 = []
     a = 0
-    unifristate1 = {"10":"立即抢购","20":"去查看","30":"","40":"已抢光","50":"未开始"}
+    unifristate1 = {"10":"立即抢购","20":"去查看","30":"无法抢购","40":"已抢光","50":"未开始"}
     for b in range(0,len(unifriactL1)):
       for i,goods in enumerate(unifriactL1[b]["goodsList"],a+1):
         unifrigoodsnl11.append(str(i)+" "+unifriactL1[b]["navClock"]+\
                                               unifristate1.get(goods["state"])+" "+goods["goodsName"])
         unifrigoodsnl1.append(goods["goodsName"])
+        nowdate1 = time.strftime("%Y-%m-%d",time.localtime(int(time.time())))
+        actLtimes1 = int(time.mktime(time.strptime(nowdate1+" "+unifriactL1[b]["navClock"]+":00",
+                                   "%Y-%m-%d %H:%M:%S"))*1000)
+        unifrigoodsbtl1.append(actLtimes1)
       a = i
       for goods in unifriactL1[b]["goodsList"]:
         unifrigoodsidl1.append(goods["goodsId"])
@@ -66,6 +71,10 @@ class Unifri1():
       unifrigoodsn1 = unifrigoodsnl1[int(unifrigoodss1)-1]
       unifrigoodsid1 = unifrigoodsidl1[int(unifrigoodss1)-1]
       unifripaypri1 = unifripaypril1[int(unifrigoodss1)-1]
+      if int(unifrigoodss1) > int(a):
+        unifrigoodsbt1 = unifrigoodsbtl1[0]
+      else:
+        unifrigoodsbt1 = unifrigoodsbtl1[int(unifrigoodss1)-1]
       print("已选择商品名称: %s\n对应的商品ID: %s\n对应的商品价格: %s\n"\
                %(unifrigoodsn1,unifrigoodsid1,unifripaypri1))
     except IndexError:
@@ -194,9 +203,9 @@ class Unifri1():
         print("该Unifri1的商品: %s 已下单成功了,如果需要再次下单,请先删除目录下对应的.ordered文件"%(unifrigoodsn1))
         AllinOneExit1()
     unifridata1 = 'reqsn=&reqtime=&cliver=&reqdata={"goodsId":"%s","payWay":"01",\
-                         "amount":"%s","reChangeNo":"%s","saleTypes":"C","points":"0","beginTime":"",\
+                         "amount":"%s","reChangeNo":"%s","saleTypes":"C","points":"0","beginTime":"%s",\
                          "imei":"undefined","sourceChannel":"","proFlag":"","scene":"","pormoterCode":"",\
-                         "maxcash":"","floortype":"undefined"}'%(unifrigoodsid1,unifripaypri1,rechangeno1)
+                         "maxcash":"","floortype":"undefined"}'%(unifrigoodsid1,unifripaypri1,rechangeno1,unifrigoodsbt1)
     self.UnifriGetOrders1()
     if re.findall(r"已结束",unifriorders1) != []:
       print("返回信息: "+unifriorders1)
