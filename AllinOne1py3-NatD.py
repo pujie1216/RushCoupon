@@ -84,7 +84,7 @@ class Unifri1():
       self.UnifriNetGoods1()
 
   def UnifriLocalGoods1(self):
-    global unifrigoodsn1,unifrigoodsid1,unifripaypri1
+    global unifrigoodsn1,unifrigoodsid1,unifripaypri1,unifrigoodsbt1
     unifrigoodsid1 = linecache.getline(r"unifri1cfg.set",22).strip()
     if unifrigoodsid1 == "8a29ac8a72a48dbe0172bb4885430d81":
       unifrigoodsn1 = "美团5元"
@@ -101,9 +101,13 @@ class Unifri1():
     elif unifrigoodsid1 == "8a29ac8973e8807e0174058dea5c0ab5":
       unifrigoodsn1 = "任沃住"
       unifripaypri1 = "66.00"
+    elif unifrigoodsid1 == "8a29ac89744fa266017453230dcb0424":
+      unifrigoodsn1 = "19.9任意电影票"
+      unifripaypri1 = "0.10"
     else:
       unifrigoodsn1 = "月卡"
       unifripaypri1 = "4.90"
+    unifrigoodsbt1 = "0"
     print("已选择商品: %s\n对应商品ID: %s\n"%(unifrigoodsn1,unifrigoodsid1))
 
   def UnifriGetOrders1(self):
@@ -169,6 +173,18 @@ class Unifri1():
           break
         time.sleep(float(unifriftime1))
         unifriftimes1 += 1
+        if unifriftimes1 % 50 == 0:
+          unifriwporderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/show/bj3034/v1",
+                                                   headers=unifriheaders1,params="reqsn=&reqtime=0&cliver=&reqdata=%7B%7D",
+                                                   cookies=unifricookies1,timeout=float(linecache.getline(r"unifri1cfg.set",30).strip())).json()
+          unifriwporders1 = unifriwporderj1["resdata"]["orderCount"]["wait_pay_order"]
+          if int(unifriwporders1) > 0:
+            print("该账号有未支付订单,请尽快支付,逾期将失效哦")
+            if int(linecache.getline(r"unifri1cfg.set",33).strip()) == 1:
+              times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
+              requests.get("https://sc.ftqq.com/%s.send?text=%s Unifri1的账号有未支付订单,请尽快支付,逾期将失效哦"\
+                            %(linecache.getline(r"unifri1cfg.set",35).strip(),times))
+            AllinOneExit1()
       print("%s 已下单成功,请尽快在30分钟内支付,逾期将失效哦"%(unifrigoodsn1))
       with open("Unifri1的商品 "+unifrigoodsn1+" "+\
                       time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"下单成功.ordered","w") as ordered:
@@ -294,6 +310,98 @@ class Citic3651():
         AllinOneExit1()
     self.Citic365Ordering1()
 
+class CCBSatProd1():
+  def CCBLocalSatP1(self):
+    global ccbsatprodid1,ccbsatprodn1
+    ccbsatprodd1 = {"1277866918189240320":"达美乐25元代金券",
+                    "1277836563464941568":"百果园18元代金券",
+                    "1277866301270036480":"肯德基20元代金券",
+                    "1278627449728180224":"CoCo都可10元代金券",
+                    "1277839380355313664":"COSTA中杯通兑券",
+                    "1278626927138873344":"屈臣氏30元代金券"
+                    }
+
+    ccbsatprodid1 = linecache.getline(r"ccbsat1cfg.set",13).strip()
+    if ccbsatprodd1.get(ccbsatprodid1) != None:
+      ccbsatprodn1 = ccbsatprodd1[ccbsatprodid1]
+    else:
+      ccbsatprodn1 = "自定义电子券"
+    print("已选择商品: %s\n对应商品ID: %s\n"%(ccbsatprodn1,ccbsatprodid1))
+
+  def CCBSatPGetOrders1(self):
+    try:
+      global ccbsatporders1
+      requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+      ccbsatpdata1 = {"gtSeccode":"%s"%(linecache.getline(r"ccbsat1cfg.set",29).strip()),"requestId":"%s"%(int(time.time()*1000)),
+                              "prodId":"%s"%(ccbsatprodid1),"activityId":"1209385000359522304"}
+      ccbsatporderj1 = requests.post("https://dragoncard.e-mallchina.com.cn/js/api/order/orderSeckill/seckillCreateOrder",
+                                                        headers=ccbsatpheaders1,cookies=ccbsatpcookies1,json=ccbsatpdata1,
+                                                        timeout=float(linecache.getline(r"ccbsat1cfg.set",19).strip()),verify=False).json()
+      ccbsatporders1 = ccbsatporderj1["returnDesc"]
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
+      self.CCBSatPGetOrders1()
+
+  def CCBOrdering1(self):
+    try:
+      ccbsatpftime1 = linecache.getline(r"ccbsat1cfg.set",16).strip()
+      ccbsatpftimes1 = 1
+      while re.findall(r"\d+",ccbsatporders1) == []:
+        print("返回信息: %s\n没有下单成功,将在%s秒后第%s次刷新"%(ccbsatporders1,ccbsatpftime1,ccbsatpftimes1))
+        self.CCBSatPGetOrders1()
+        if re.findall(r"\d+",ccbsatporders1) != []:
+          break
+        elif re.findall(r"页面失效",ccbsatporders1) != []:
+          print("返回信息: %s\nSeccode失效了,请重新获取Seccode"%(ccbsatporders1))
+          AllinOneExit1()
+        elif re.findall(r"登录已失效",ccbsatporders1) != []:
+          print("返回信息: %s\n建行登录状态失效了,请重新获取Cookie"%(ccbsatporders1))
+          AllinOneExit1()
+        elif re.findall(r"\?{3,}",ccbsatporders1) != []:
+          print("返回信息: %s\n可能被盾了,再次尝试后没有返回任何信息则请过一段时间再尝试"%(ccbsatporders1))
+          AllinOneExit1()
+        time.sleep(float(ccbsatpftime1))
+        ccbsatpftimes1 += 1
+      print("%s 下单成功,请尽快在5分钟内支付,逾期将失效哦"%(ccbsatprodn1))
+      with open("CCBSat1的商品 "+ccbsatprodn1+" "+\
+                       time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"下单成功.ordered","w") as ordered:
+        print("已记录CCBSat1的商品:%s 下单成功时间"%(ccbsatprodn1))
+      if int(linecache.getline(r"ccbsat1cfg.set",22).strip()) == 1:
+        times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
+        requests.get("https://sc.ftqq.com/%s.send?text=%s %s 下单成功,请尽快在5分钟内支付,逾期将失效哦"\
+                            %(linecache.getline(r"citic3651cfg.set",24).strip(),times,ccbsatprodn1))
+      AllinOneExit1()
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
+      self.CCBOrdering1()
+
+  def CCBSatPMain1(self):
+    global ccbsatpheaders1,ccbsatpcookies1
+    print("\n正在运行龙卡星期六\n")
+    ccbsatpheaders1 =  {
+      "user-agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36",
+      "token":"%s"%(linecache.getline(r"ccbsat1cfg.set",27).strip()),
+      "content-type":"application/json; charset=UTF-8"
+      }
+    ccbsatpcookies1 = {"Cookies":"%s"%(linecache.getline(r"ccbsat1cfg.set",31).strip())}
+    self.CCBLocalSatP1()
+    for files in os.walk(os.getcwd()):
+      if re.findall("CCBSatP1的商品 %s.*\.ordered"%(ccbsatprodn1),str(files),flags=re.I) != []:
+        print("该CCBSatP1的商品: %s 已下单成功了,如果需要再次下单,请先删除目录下对应的.ordered文件"%(ccbsatprodn1))
+        AllinOneExit1()
+    self.CCBSatPGetOrders1()
+    if re.findall(r"页面失效",ccbsatporders1) != []:
+      print("返回信息: %s\nSeccode失效了,请重新获取Seccode"%(ccbsatporders1))
+      AllinOneExit1()
+    elif re.findall(r"登录已失效",ccbsatporders1) != []:
+      print("返回信息: %s\n建行登录状态失效了,请重新获取Cookie"%(ccbsatporders1))
+      AllinOneExit1()
+    elif re.findall(r"商品已售罄或非购买时段",ccbsatporders1) != []:
+      print("返回信息: "+ccbsatporders1)
+      print("如果活动未开始却显示非购买时段请直接按确定继续运行\n如果活动真的已结束请输入 e 然后按确定退出程序")
+      ccbsatask1 = input()
+      if ccbsatask1.lower() == "e":
+        AllinOneExit1()
+    self.CCBOrdering1()
+
 def AllinOneMain1():
   funcl = ["1 联通超级星期五 - 国庆节特供",
                "2 中信365 (每周三周六11点)",
@@ -319,8 +427,7 @@ def AllinOneMain1():
       print("等待整合中\n")
       AllinOneExit1()
     elif int(funcsel) == 5:
-      print("等待整合中\n")
-      AllinOneExit1()
+      CCBSatProd1().CCBSatPMain1()
   else:
     print("请输入仅列出的数字,1秒后重新输入")
     time.sleep(1)
@@ -343,7 +450,16 @@ try:
 except FileNotFoundError:
   print("出错了,该目录下没有 citic3651cfg.set 文件哦")
   AllinOneExit1()
+try:
+  ccbsatlines1 = len(open(r"ccbsat1cfg.set",errors="ignore",encoding="UTF-8").readlines())
+  if ccbsatlines1 != 31:
+    print("出错了, ccbsat1cfg.set 的行数不对哦")
+    AllinOneExit1()
+except FileNotFoundError:
+  print("出错了,该目录下没有 ccbsat1cfg.set 文件哦")
+  AllinOneExit1()
 linecache.updatecache("unifri1cfg.set")
 linecache.updatecache("citic3651cfg.set")
+linecache.updatecache("ccbsat1cfg.set")
 
 AllinOneMain1()
