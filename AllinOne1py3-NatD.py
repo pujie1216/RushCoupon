@@ -117,7 +117,7 @@ class Unifri1():
                                                    headers=unifriheaders1,params=unifridata1,cookies=unifricookies1,
                                                    timeout=float(linecache.getline(r"unifri1cfg.set",30).strip())).json()
       unifriorders1 = unifriorderj1["msg"]
-    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
+    except:
       self.UnifriGetOrders1()
 
   def UnifriGettime1(self):
@@ -174,17 +174,19 @@ class Unifri1():
         time.sleep(float(unifriftime1))
         unifriftimes1 += 1
         if unifriftimes1 % 50 == 0:
-          unifriwporderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/show/bj3034/v1",
+          try:
+            unifriwporderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/show/bj3034/v1",
                                                    headers=unifriheaders1,params="reqsn=&reqtime=0&cliver=&reqdata=%7B%7D",
                                                    cookies=unifricookies1,timeout=float(linecache.getline(r"unifri1cfg.set",30).strip())).json()
-          unifriwporders1 = unifriwporderj1["resdata"]["orderCount"]["wait_pay_order"]
-          if int(unifriwporders1) > 0:
-            print("该账号有未支付订单,请尽快支付,逾期将失效哦")
-            if int(linecache.getline(r"unifri1cfg.set",33).strip()) == 1:
-              times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
-              requests.get("https://sc.ftqq.com/%s.send?text=%s Unifri1的账号有未支付订单,请尽快支付,逾期将失效哦"\
+            unifriwporders1 = unifriwporderj1["resdata"]["orderCount"]["wait_pay_order"]
+            if int(unifriwporders1) > 0:
+              print("该账号有未支付订单,请尽快支付,逾期将失效哦")
+              if int(linecache.getline(r"unifri1cfg.set",33).strip()) == 1:
+                times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
+                requests.get("https://sc.ftqq.com/%s.send?text=%s Unifri1的账号有未支付订单,请尽快支付,逾期将失效哦"\
                             %(linecache.getline(r"unifri1cfg.set",35).strip(),times))
-            AllinOneExit1()
+              AllinOneExit1()
+          except:pass
       print("%s 已下单成功,请尽快在30分钟内支付,逾期将失效哦"%(unifrigoodsn1))
       with open("Unifri1的商品 "+unifrigoodsn1+" "+\
                       time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"下单成功.ordered","w") as ordered:
@@ -256,7 +258,7 @@ class Citic3651():
                                                         headers=citic365headers1,cookies=citic365cookies1,json=citic365data1,
                                                         timeout=float(linecache.getline(r"citic3651cfg.set",16).strip())).json()
       citic365orders1 = citic365orderj1["retMsg"]
-    except requests.exceptions.Timeout:
+    except:
       self.Citic365GetOrders1()
 
   def Citic365Ordering1(self):
@@ -338,7 +340,7 @@ class CCBSatProd1():
                                                         headers=ccbsatpheaders1,cookies=ccbsatpcookies1,json=ccbsatpdata1,
                                                         timeout=float(linecache.getline(r"ccbsat1cfg.set",19).strip()),verify=False).json()
       ccbsatporders1 = ccbsatporderj1["returnDesc"]
-    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
+    except:
       self.CCBSatPGetOrders1()
 
   def CCBOrdering1(self):
@@ -402,12 +404,102 @@ class CCBSatProd1():
         AllinOneExit1()
     self.CCBOrdering1()
 
+class JDCoupon1():
+  def JDGetCoupons1(self):
+    try:
+      global jdgetcoupons1
+      if jdcproleid1 != "0":
+        jdgetcouponj1 = requests.get('http://api.m.jd.com/client.action?functionId=newBabelAwardCollection&client=wh5&body={"activityId":"3NB6VBGKErXfgmVVnaMsn5VH4xaV","scene":"1","args":"key=%s,roleId=%s"}'%(jdcpkeyid1,jdcproleid1),
+                                                    headers=jdheaders1,cookies=jdcookies1,timeout=float(linecache.getline(r"jdgetc1cfg.set",19).strip())).json()
+      else:
+        jdgetcouponj1 = requests.get('http://api.m.jd.com/client.action?functionId=newBabelAwardCollection&client=wh5&body={"activityId":"3NB6VBGKErXfgmVVnaMsn5VH4xaV","scene":"3","actKey":"%s"}'%(jdcpkeyid1),
+                                                    headers=jdheaders1,cookies=jdcookies1,timeout=float(linecache.getline(r"jdgetc1cfg.set",19).strip())).json()
+      if re.findall(r"subCodeMsg",str(jdgetcouponj1),flags=re.I) != []:
+        jdgetcoupons1 = jdgetcouponj1["subCodeMsg"]
+      else:
+        jdgetcoupons1 = jdgetcouponj1["errmsg"]
+    except:
+      self.JDGetCoupons1()
+
+  def JDGettime1(self):
+    try:
+      global jdtime1
+      jdtimes1 = requests.get("https://a.jd.com//ajax/queryServerData.html",
+                                            headers=jdheaders1,timeout=1).json()["serverTime"]
+      jdtime1 = time.strftime("%H:%M:%S",time.localtime(jdtimes1/1000))
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
+      self.JDGettime1()
+
+  def JDCGetting1(self):
+    try:
+      jdgcftime1 = linecache.getline(r"jdgetc1cfg.set",16).strip()
+      jdgcftimes1 = 1
+      if int(linecache.getline(r"jdgetc1cfg.set",11).strip()) == 1:
+        jdrushtime1 = linecache.getline(r"jdgetc1cfg.set",12).strip()
+        jdwaittime1 = (datetime.datetime.strptime(jdrushtime1,"%H:%M:%S")+datetime.timedelta(minutes=-30)).strftime("%H:%M:%S")
+        jdrushtime11 = (datetime.datetime.strptime(jdrushtime1,"%H:%M:%S")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S")
+        self.JDGettime1()
+        if jdtime1 > jdwaittime1 and jdtime1 < jdrushtime1:
+          print("请勿关闭,程序将在 %s 开抢"%(jdrushtime1))
+          while jdtime1 < jdrushtime1:
+            self.JDGettime1()
+            if jdtime1 > jdwaittime1 and jdtime1 < jdrushtime11:
+              time.sleep(30)
+            else:
+              time.sleep(0.01)
+          time.sleep(float(linecache.getline(r"jdgetc1cfg.set",14).strip()))
+      while re.findall(r"领取成功",jdgetcoupons1) == []:
+        print("返回信息: %s\n没有抢券成功,将在%s秒后第%s次刷新"%(jdgetcoupons1,jdgcftime1,jdgcftimes1))
+        self.JDGetCoupons1()
+        if re.findall(r"领取成功",jdgetcoupons1) != []:
+          break
+        elif re.findall(r"已经参加过",jdgetcoupons1) != []:
+          print("返回信息: %s\n该账号已经领取到优惠券了,请自行查看"%(jdgetcoupons1))
+          AllinOneExit1()
+        time.sleep(float(jdgcftime1))
+        jdgcftimes1 += 1
+      print("%s 抢券成功,请自行查看"%(jdcpkeyid1))
+      with open("JDCoupon1的优惠券 "+jdcpkeyid1+" "+\
+                       time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"抢券成功.rushed","w") as rushed:
+        print("已记录JDCoupon1的优惠券:%s 抢券成功时间"%(jdcpkeyid1))
+      if int(linecache.getline(r"jdgetc1cfg.set",22).strip()) == 1:
+        times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
+        requests.get("https://sc.ftqq.com/%s.send?text=%s %s 抢券成功,请自行查看"\
+                            %(linecache.getline(r"citic3651cfg.set",24).strip(),times,jdcpkeyid1))
+      AllinOneExit1()
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
+      self.JDCGetting1()
+
+  def JDCouponMain1(self):
+    global jdheaders1,jdcookies1,jdcpkeyid1,jdcproleid1
+    print("\n正在运行京东抢优惠券\n")
+    jdheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36"}
+    jdcookies1 = {"Cookies":"%s"%(linecache.getline(r"jdgetc1cfg.set",27).strip())}
+    jdcpkeyid1 = linecache.getline(r"jdgetc1cfg.set",6).strip()
+    jdcproleid1 = linecache.getline(r"jdgetc1cfg.set",8).strip()
+    for files in os.walk(os.getcwd()):
+      if re.findall("JDCoupon1的优惠券 %s.*\.rushed"%(jdcpkeyid1),str(files),flags=re.I) != []:
+        print("该JDCoupon1的优惠券: %s 已抢券成功了,如果需要再次抢券,请先删除目录下对应的.rushed文件"%(jdcpkeyid1))
+        AllinOneExit1()
+    self.JDGetCoupons1()
+    if re.findall(r"not login",jdgetcoupons1,flags=re.I) != []:
+      print("返回信息: %s\nJD登录状态失效了,请重新获取Cookie"%(jdgetcoupons1))
+      AllinOneExit1()
+    elif re.findall(r"已经参加过",jdgetcoupons1) != []:
+      print("返回信息: %s\n该账号已经领取到优惠券了,请自行查看"%(jdgetcoupons1))
+      AllinOneExit1()
+    elif re.findall(r"来太晚了|结束",jdgetcoupons1,flags=re.I) != []:
+      print("返回信息: %s\n来晚了,券已过期"%(jdgetcoupons1))
+      AllinOneExit1()
+    self.JDCGetting1()
+
 def AllinOneMain1():
   funcl = ["1 联通超级星期五 - 国庆节特供",
                "2 中信365 (每周三周六11点)",
                "3 中行RMB电子券 微信端 (每周二10点)",
                "4 中行99积分电子券 微信端 (每周四10点)",
-               "5 龙卡星期六 (每周六11点)"]
+               "5 龙卡星期六 (每周六11点)",
+               "6 京东抢优惠券"]
   print("功能选择:\n\n"+"\n\n".join(funcl))
   funcsel = input("\n更多整合等待发现,欢迎回复提供\n\n请输入对应数字然后按确定:")
   if funcsel == "" or funcsel == "0":
@@ -428,6 +520,8 @@ def AllinOneMain1():
       AllinOneExit1()
     elif int(funcsel) == 5:
       CCBSatProd1().CCBSatPMain1()
+    elif int(funcsel) == 6:
+      JDCoupon1().JDCouponMain1()
   else:
     print("请输入仅列出的数字,1秒后重新输入")
     time.sleep(1)
@@ -458,8 +552,17 @@ try:
 except FileNotFoundError:
   print("出错了,该目录下没有 ccbsat1cfg.set 文件哦")
   AllinOneExit1()
+try:
+  jdgetclines1 = len(open(r"jdgetc1cfg.set",errors="ignore",encoding="UTF-8").readlines())
+  if jdgetclines1 != 27:
+    print("出错了, jdgetc1cfg.set 的行数不对哦")
+    AllinOneExit1()
+except FileNotFoundError:
+  print("出错了,该目录下没有 jdgetc1cfg.set 文件哦")
+  AllinOneExit1()
 linecache.updatecache("unifri1cfg.set")
 linecache.updatecache("citic3651cfg.set")
 linecache.updatecache("ccbsat1cfg.set")
+linecache.updatecache("jdgetc1cfg.set")
 
 AllinOneMain1()
