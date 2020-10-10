@@ -10,7 +10,7 @@
 37202008130178662128
 
 刷新时间(秒):   #填写1则为1秒,填写0.5则为500毫秒,以此类推,自行换算,请勿设置过低,否则可能会因频繁而出错
-0.5
+0.1
 
 连接超时设置(秒):   #如果遇到网络繁忙或拥挤或404时,超过设置的时间会重新运行抢购,否则会一直等待,网络波动较大的建议不要设置过低,不然可能会频繁出错
 1
@@ -21,4 +21,4 @@
 SCU
 
 Cookies:   #需要自行抓包获取,开头有可能不一样的,只要能用就行了,该Cookies持续时间较短,大概十几分钟左右,建议提前5分钟重新抓取
-88888888
+63f6d7504710=iae0fb9bb253f4fb1934952e76d57cc9d9c; JSESSIONID_BASEH5=dkkj_60f4f71c-3159-4421-8407-54b4bdba268e; JSESSIONID_DKKJ=dkkj_60f4f71c-3159-4421-8407-54b4bdba268e; citic_ucname=%E5%B0%81%E8%B1%AA; cs_session=JGbllIR1jUZlDlatsr+pBtf5tWmTbdfzFEDatPFl5QE5MyMcE9XuYw==; pn=MTU2Mzg4ODg4MTQ%3D; 63f6d7504710-w=h4e2fb26d10e7434b9e2ff120c32a9be511; af14d045a247=56934911e5f4403bb715cd21089a2a25
