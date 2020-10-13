@@ -162,13 +162,13 @@ class Unifri1():
               time.sleep(0.01)
         time.sleep(float(linecache.getline(r"unifri1cfg.set",17).strip()))
       self.UnifriGetOrders1()
-      while re.findall(r"下单成功",unifriorders1) == []:
+      while re.findall(r"下单成功",str(unifriorders1)) == []:
         print("返回信息: "+unifriorders1)
-        if re.findall(r"达到上限|数量限制|次数限制",unifriorders1) != []:
+        if re.findall(r"达到上限|数量限制|次数限制",str(unifriorders1)) != []:
           print("返回信息: "+unifriorders1)
           print("该账号已有订单,不能再次购买\n")
           AllinOneExit1()
-        elif re.findall(r"下单成功",unifriorders1) != []:
+        elif re.findall(r"下单成功",str(unifriorders1)) != []:
           break
         unifriftimes1 += 1
         if unifriftimes1 % 50 == 0:
@@ -226,17 +226,17 @@ class Unifri1():
                          '"imei":"undefined","sourceChannel":"","proFlag":"","scene":"","pormoterCode":"",'\
                          '"maxcash":"","floortype":"undefined"}'%(unifrigoodsid1,unifripaypri1,rechangeno1,unifrigoodsbt1)
     self.UnifriGetOrders1()
-    if re.findall(r"已结束",unifriorders1) != []:
+    if re.findall(r"已结束",str(unifriorders1)) != []:
       print("返回信息: "+unifriorders1)
       print("如果活动未开始却显示已结束请直接按确定继续运行\n如果活动真的已结束请输入 e 然后按确定退出程序")
       unifriask1 = input()
       if unifriask1.lower() == "e":
         AllinOneExit1()
-    elif re.findall(r"达到上限|数量限制|次数限制",unifriorders1) != []:
+    elif re.findall(r"达到上限|数量限制|次数限制",str(unifriorders1)) != []:
       print("返回信息: "+unifriorders1)
       print("该账号已有订单,不能再次购买\n")
       AllinOneExit1()
-    elif re.findall(r"商品信息不存在",unifriorders1) != []:
+    elif re.findall(r"商品信息不存在",str(unifriorders1)) != []:
       print("返回信息: "+unifriorders1)
       print("可能未到活动当天哦,请注意使用\n")
     time.sleep(5)
@@ -291,9 +291,9 @@ class Citic3651():
               time.sleep(30)
           time.sleep(1)
       self.Citic365GetOrders1()
-      while re.findall(r"[^处理成功]",citic365orders1) != []:
+      while re.findall(r"[^处理成功]",str(citic365orders1)) != []:
         print("返回信息: "+citic365orders1)
-        if re.findall(r"处理成功",citic365orders1) != []:
+        if re.findall(r"处理成功",str(citic365orders1)) != []:
           break
         citic365ftimes1 += 1
         print("没有下单成功,将在%s秒后第%s次刷新"%(citic365ftime1,citic365ftimes1))
@@ -378,17 +378,17 @@ class CCBSatProd1():
       ccbsatpftime1 = linecache.getline(r"ccbsat1cfg.set",16).strip()
       ccbsatpftimes1 = 1
       self.CCBSatPGetOrders1()
-      while re.findall(r"\d+",ccbsatporders1) == []:
+      while re.findall(r"\d+",str(ccbsatporders1)) == []:
         print("返回信息: "+ccbsatporders1)
-        if re.findall(r"\d+",ccbsatporders1) != []:
+        if re.findall(r"\d+",str(ccbsatporders1)) != []:
           break
-        elif re.findall(r"页面失效",ccbsatporders1) != []:
+        elif re.findall(r"页面失效",str(ccbsatporders1)) != []:
           print("返回信息: %s\nSeccode失效了,请重新获取Seccode"%(ccbsatporders1))
           AllinOneExit1()
-        elif re.findall(r"登录已失效",ccbsatporders1) != []:
+        elif re.findall(r"登录已失效",str(ccbsatporders1)) != []:
           print("返回信息: %s\n建行登录状态失效了,请重新获取Cookie"%(ccbsatporders1))
           AllinOneExit1()
-        elif re.findall(r"\?{3,}",ccbsatporders1) != []:
+        elif re.findall(r"\?{3,}",str(ccbsatporders1)) != []:
           print("返回信息: %s\n可能被盾了,再次尝试后没有返回任何信息则请过一段时间再尝试"%(ccbsatporders1))
           AllinOneExit1()
         ccbsatpftimes1 += 1
@@ -422,13 +422,13 @@ class CCBSatProd1():
         print("该CCBSatP1的商品: %s 已下单成功了,如果需要再次下单,请先删除目录下对应的.ordered文件"%(ccbsatprodn1))
         AllinOneExit1()
     self.CCBSatPGetOrders1()
-    if re.findall(r"页面失效",ccbsatporders1) != []:
+    if re.findall(r"页面失效",str(ccbsatporders1)) != []:
       print("返回信息: %s\nSeccode失效了,请重新获取Seccode"%(ccbsatporders1))
       AllinOneExit1()
-    elif re.findall(r"登录已失效",ccbsatporders1) != []:
+    elif re.findall(r"登录已失效",str(ccbsatporders1)) != []:
       print("返回信息: %s\n建行登录状态失效了,请重新获取Cookie"%(ccbsatporders1))
       AllinOneExit1()
-    elif re.findall(r"非购买时段",ccbsatporders1) != []:
+    elif re.findall(r"非购买时段",str(ccbsatporders1)) != []:
       print("返回信息: "+ccbsatporders1)
       print("如果活动未开始却显示非购买时段请直接按确定继续运行\n如果活动真的已结束请输入 e 然后按确定退出程序")
       ccbsatask1 = input()
@@ -442,11 +442,11 @@ class JDCoupon1():
     try:
       global jdgetcoupons1
       if jdcproleid1 != "0":
-        jdgetcouponj1 = requests.get('http://api.m.jd.com/client.action?functionId=newBabelAwardCollection&client=wh5&body={"activityId":"3NB6VBGKErXfgmVVnaMsn5VH4xaV","scene":"1","args":"key=%s,roleId=%s"}'%(jdcpkeyid1,jdcproleid1),
-                                                    headers=jdheaders1,cookies=jdcookies1,timeout=float(linecache.getline(r"jdgetc1cfg.set",21).strip())).json()
+        jdgetcouponj1 = requests.get('http://api.m.jd.com/client.action?functionId=newBabelAwardCollection&client=wh5&body={"activityId":"%s","scene":"1","args":"key=%s,roleId=%s"}'%(jdcpactid1,jdcpkeyid1,jdcproleid1),
+                                                    headers=jdheaders1,cookies=jdcookies1,timeout=float(linecache.getline(r"jdgetc1cfg.set",22).strip())).json()
       else:
-        jdgetcouponj1 = requests.get('http://api.m.jd.com/client.action?functionId=newBabelAwardCollection&client=wh5&body={"activityId":"3NB6VBGKErXfgmVVnaMsn5VH4xaV","scene":"3","actKey":"%s"}'%(jdcpkeyid1),
-                                                    headers=jdheaders1,cookies=jdcookies1,timeout=float(linecache.getline(r"jdgetc1cfg.set",21).strip())).json()
+        jdgetcouponj1 = requests.get('http://api.m.jd.com/client.action?functionId=newBabelAwardCollection&client=wh5&body={"activityId":"%s","scene":"3","actKey":"%s"}'%(jdcpactid1,jdcpkeyid1),
+                                                    headers=jdheaders1,cookies=jdcookies1,timeout=float(linecache.getline(r"jdgetc1cfg.set",22).strip())).json()
       if re.findall(r"subCodeMsg",str(jdgetcouponj1),flags=re.I) != []:
         jdgetcoupons1 = jdgetcouponj1["subCodeMsg"]
       else:
@@ -465,10 +465,10 @@ class JDCoupon1():
 
   def JDCGetting1(self):
     try:
-      jdgcftime1 = linecache.getline(r"jdgetc1cfg.set",16).strip()
+      jdgcftime1 = linecache.getline(r"jdgetc1cfg.set",17).strip()
       jdgcftimes1 = 1
-      if int(linecache.getline(r"jdgetc1cfg.set",11).strip()) == 1:
-        jdrushtime1 = linecache.getline(r"jdgetc1cfg.set",12).strip()
+      if int(linecache.getline(r"jdgetc1cfg.set",12).strip()) == 1:
+        jdrushtime1 = linecache.getline(r"jdgetc1cfg.set",13).strip()
         jdwaittime1 = (datetime.datetime.strptime(jdrushtime1,"%H:%M:%S.%f")+datetime.timedelta(minutes=-30)).strftime("%H:%M:%S")
         jdrushtime11 = (datetime.datetime.strptime(jdrushtime1,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S")
         self.JDGettime1()
@@ -480,17 +480,17 @@ class JDCoupon1():
               time.sleep(30)
             else:
               time.sleep(0.01)
-          time.sleep(float(linecache.getline(r"jdgetc1cfg.set",14).strip()))
+          time.sleep(float(linecache.getline(r"jdgetc1cfg.set",15).strip()))
       self.JDGetCoupons1()
-      while re.findall(r"领取成功",jdgetcoupons1) == []:
+      while re.findall(r"领取成功",str(jdgetcoupons1)) == []:
         print("返回信息: "+jdgetcoupons1)
-        if re.findall(r"领取成功",jdgetcoupons1) != []:
+        if re.findall(r"领取成功",str(jdgetcoupons1)) != []:
           break
-        elif re.findall(r"已经参加过",jdgetcoupons1) != []:
+        elif re.findall(r"已经参加过",str(jdgetcoupons1)) != []:
           print("返回信息: %s\n该账号已经领取到优惠券了,请自行查看"%(jdgetcoupons1))
           AllinOneExit1()
         jdgcftimes1 += 1
-        if jdgcftimes1 > int(linecache.getline(r"jdgetc1cfg.set",18).strip()):
+        if jdgcftimes1 > int(linecache.getline(r"jdgetc1cfg.set",19).strip()):
           print("\n已达到设定的刷新次数\n")
           AllinOneExit1()
         print("没有抢券成功,将在%s秒后第%s次刷新"%(jdgcftime1,jdgcftimes1))
@@ -500,37 +500,41 @@ class JDCoupon1():
       with open("JDCoupon1的优惠券 "+jdcpkeyid1+" "+\
                        time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"抢券成功.rushed","w") as rushed:
         print("已记录JDCoupon1的优惠券:%s 抢券成功时间"%(jdcpkeyid1))
-      if int(linecache.getline(r"jdgetc1cfg.set",24).strip()) == 1:
+      if int(linecache.getline(r"jdgetc1cfg.set",25).strip()) == 1:
         times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
         requests.get("https://sc.ftqq.com/%s.send?text=%s %s 抢券成功,请自行查看"\
-                            %(linecache.getline(r"jdgetc1cfg.set",26).strip(),times,jdcpkeyid1))
+                            %(linecache.getline(r"jdgetc1cfg.set",27).strip(),times,jdcpkeyid1))
       AllinOneExit1()
     except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
       self.JDCGetting1()
 
   def JDCouponMain1(self):
-    global jdheaders1,jdcookies1,jdcpkeyid1,jdcproleid1
+    global jdheaders1,jdcookies1,jdcpactid1,jdcpkeyid1,jdcproleid1
     print("\n正在运行京东抢任意优惠券\n")
     jdheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36"}
-    jdcookies1 = {"Cookies":"%s"%(linecache.getline(r"jdgetc1cfg.set",29).strip())}
-    jdcpkeyid1 = linecache.getline(r"jdgetc1cfg.set",6).strip()
-    jdcproleid1 = linecache.getline(r"jdgetc1cfg.set",8).strip()
+    jdcookies1 = {"Cookies":"%s"%(linecache.getline(r"jdgetc1cfg.set",30).strip())}
+    jdcpactid1 = linecache.getline(r"jdgetc1cfg.set",5).strip()
+    jdcpkeyid1 = linecache.getline(r"jdgetc1cfg.set",7).strip()
+    jdcproleid1 = linecache.getline(r"jdgetc1cfg.set",9).strip()
     if jdcproleid1 == "0":
       print("当前抢券的 keyid 是: %s\n"%(jdcpkeyid1))
     else:
-      print("当前抢券的 keyid 是: %s\nroleid 是: %s"%(jdcpkeyid1,jdcproleid1))
+      print("当前抢券的 keyid 是: %s\nroleid 是: %s\n"%(jdcpkeyid1,jdcproleid1))
     for files in os.walk(os.getcwd()):
       if re.findall("JDCoupon1的优惠券 %s.*\.rushed"%(jdcpkeyid1),str(files),flags=re.I) != []:
         print("该JDCoupon1的优惠券: %s 已抢券成功了,如果需要再次抢券,请先删除目录下对应的.rushed文件"%(jdcpkeyid1))
         AllinOneExit1()
     self.JDGetCoupons1()
-    if re.findall(r"not login",jdgetcoupons1,flags=re.I) != []:
+    if re.findall(r"not login",str(jdgetcoupons1),flags=re.I) != []:
       print("返回信息: %s\nJD登录状态失效了,请重新获取Cookie"%(jdgetcoupons1))
       AllinOneExit1()
-    elif re.findall(r"已经参加过",jdgetcoupons1) != []:
+    elif jdgetcoupons1 == None or re.findall(r"activityId invalid",str(jdgetcoupons1),flags=re.I) != []:
+      print("返回信息: %s\n活动页面ID错误,请重新获取活动页面ID"%(jdgetcoupons1))
+      AllinOneExit1()
+    elif re.findall(r"已经参加过",str(jdgetcoupons1)) != []:
       print("返回信息: %s\n该账号已经领取到优惠券了,请自行查看"%(jdgetcoupons1))
       AllinOneExit1()
-    elif re.findall(r"来太晚了|结束",jdgetcoupons1,flags=re.I) != []:
+    elif re.findall(r"来太晚了|结束",str(jdgetcoupons1)) != []:
       print("返回信息: %s\n来晚了,券已过期"%(jdgetcoupons1))
       AllinOneExit1()
     time.sleep(5)
@@ -597,7 +601,7 @@ except FileNotFoundError:
   AllinOneExit1()
 try:
   jdgetclines1 = len(open(r"jdgetc1cfg.set",errors="ignore",encoding="UTF-8").readlines())
-  if jdgetclines1 != 29:
+  if jdgetclines1 != 30:
     print("出错了, jdgetc1cfg.set 的行数不对哦")
     AllinOneExit1()
 except FileNotFoundError:
