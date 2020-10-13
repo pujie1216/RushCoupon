@@ -5,23 +5,28 @@ Windows:
 Python2/3:
 python -m ensurepip
 python -m pip install requests
+python -m pip install rsa
 
 MAC OS: (可能会提示安装 cc 命令工具,安装即可)
 Python2:
 python -m ensurepip
 python -m pip install requests
+python -m pip install rsa
 
 Python3:
 python3 -m ensurepip
 python3 -m pip install requests
+python3 -m pip install rsa
 
 Ubuntu: (其它Linux系统自行搜索方法)
 Python2:
 sudo apt-get update
 sudo apt-get install python-tk
 sudo apt-get install python-requests
+sudo apt-get install python-rsa
 
 Python3:
 sudo apt-get update
 sudo apt-get install python3-tk
 sudo apt-get install python3-requests
+sudo apt-get install python3-rsa
