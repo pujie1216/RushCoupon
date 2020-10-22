@@ -24,10 +24,10 @@ def AllinOneClear1():
       
 class Unifri1():
   def UnifriNetGoods1(self):
-    global unifrigoodsn1,unifrigoodsid1,unifripaypri1,unifrigoodsbt1
+    global unifrigoodsn1,unifrigoodsid1,unifripaypri1,unifrigoodsbtl1,unifrigoodsbt1
     try:
       unifrigoodsq1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/get619Activity/v1?whetherFriday=YES",
-                                                    cookies=unifricookies1,headers=unifriheaders1,timeout=3).json()
+                                                    headers=unifriheaders1,timeout=3).json()
     except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
       self.UnifriNetGoods1()
     if re.findall(r"未登录",str(unifrigoodsq1)) != []:
@@ -115,7 +115,7 @@ class Unifri1():
     try:
       global unifriorders1
       unifriorderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/api/bj2402/v1",
-                                                   headers=unifriheaders1,params=unifridata1,cookies=unifricookies1,
+                                                   headers=unifriheaders1,params=unifridata1,
                                                    timeout=float(linecache.getline(r"unifri1cfg.set",30).strip())).json()
       unifriorders1 = unifriorderj1["msg"]
     except:
@@ -135,31 +135,23 @@ class Unifri1():
       unifriftime1 = linecache.getline(r"unifri1cfg.set",27).strip()
       unifriftimes1 = 1
       if int(linecache.getline(r"unifri1cfg.set",15).strip()) == 1:
+        unifrirt1 = []
+        for times in unifrigoodsbtl1:
+          timef = datetime.datetime.fromtimestamp(times/1000).strftime("%H:%M:%S.%f")[:-3]
+          if not timef in unifrirt1:
+            unifrirt1.append(timef)
         self.UnifriGettime1()
-        if unifritime1 < "10:00:00":
-          print("请勿关闭,程序将在10点0秒开抢")
-          while unifritime1 < "10:00:00.000":
-            self.UnifriGettime1()
-            if unifritime1 < "09:59:00.000":
-              time.sleep(30)
-            else:
-              time.sleep(0.01)
-        elif unifritime1 > "11:30:00.000" and unifritime1 < "12:00:00.000":
-          print("请勿关闭,程序将在12点0秒开抢")
-          while unifritime1 < "12:00:00.000":
-            self.UnifriGettime1()
-            if unifritime1 > "11:30:00.000" and unifritime1 < "11:59:00.000":
-              time.sleep(30)
-            else:
-              time.sleep(0.01)
-        elif unifritime1 > "15:30:00" and unifritime1 < "16:00:00.000":
-          print("请勿关闭,程序将在16点0秒开抢")
-          while unifritime1 < "16:00:00":
-            self.UnifriGettime1()
-            if unifritime1 > "15:30:00.000" and unifritime1 < "15:59:00.000":
-              time.sleep(30)
-            else:
-              time.sleep(0.01)
+        for timef in unifrirt1:
+          unifriwt1 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-30)).strftime("%H:%M:%S.%f")[:-3]
+          if unifritime1 > unifriwt1 and unifritime1 < timef:
+            print("请勿关闭,程序将在 %s 开抢"%(timef))
+            while unifritime1 > unifriwt1 and unifritime1 < timef:
+              unifriwt11 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S.%f")[:-3]
+              if unifritime1 < unifriwt11:
+                time.sleep(30)
+              else:
+                time.sleep(0.01)
+              self.UnifriGettime1()
         time.sleep(float(linecache.getline(r"unifri1cfg.set",17).strip()))
       self.UnifriGetOrders1()
       while re.findall(r"下单成功",str(unifriorders1)) == []:
@@ -175,7 +167,7 @@ class Unifri1():
           try:
             unifriwporderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/show/bj3034/v1",
                                                    headers=unifriheaders1,params="reqsn=&reqtime=0&cliver=&reqdata=%7B%7D",
-                                                   cookies=unifricookies1,timeout=float(linecache.getline(r"unifri1cfg.set",30).strip())).json()
+                                                   timeout=float(linecache.getline(r"unifri1cfg.set",30).strip())).json()
             unifriwporders1 = unifriwporderj1["resdata"]["orderCount"]["wait_pay_order"]
             if int(unifriwporders1) > 0:
               print("该账号有未支付订单,请尽快支付,逾期将失效哦")
@@ -201,17 +193,17 @@ class Unifri1():
       self.UnifriOrdering1()
   
   def UnifriMain1(self):
-    global unifriheaders1,unifricookies1,unifridata1
+    global unifriheaders1,unifridata1
     rechangeno1 = linecache.getline(r"unifri1cfg.set",24).strip()
     print("\n正在运行联通超级星期五\n当前配置的对应手机号为: %s\n"%(rechangeno1))
     unifriheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/\
                                 537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36; \
-                                unicom{version:android@7.0500}"}
-    unifricookies1 = {"Cookies":"%s"%(linecache.getline(r"unifri1cfg.set",38).strip())}
+                                unicom{version:android@7.0500}",
+                                "Cookie":"%s"%(linecache.getline(r"unifri1cfg.set",38).strip())}
     if int(linecache.getline(r"unifri1cfg.set",20).strip()) == 1:
       self.UnifriLocalGoods1()
       unifrigoodsq1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/get619Activity/v1?whetherFriday=YES",
-                                                       cookies=unifricookies1,headers=unifriheaders1,timeout=3).json()
+                                                     headers=unifriheaders1,timeout=3).json()
       if re.findall(r"未登录",str(unifrigoodsq1)) != []:
         print("返回信息: "+unifrigoodsq1["msg"]+"\n联通登录状态失效了,请重新获取Cookie")
         AllinOneExit1()
@@ -269,7 +261,7 @@ class Citic3651():
     try:
       global citic365orders1
       citic365orderj1 = requests.post("https://mtp.creditcard.ecitic.com/citiccard/mtp-locallife-app/order/add",
-                                                        headers=citic365headers1,cookies=citic365cookies1,json=citic365data1,
+                                                        headers=citic365headers1,json=citic365data1,
                                                         timeout=float(linecache.getline(r"citic3651cfg.set",18).strip())).json()
       citic365orders1 = citic365orderj1["retMsg"]
     except:
@@ -312,16 +304,16 @@ class Citic3651():
       self.Citic365Ordering1()
 
   def Citic365Main1(self):
-    global citic365headers1,citic365cookies1,citic365data1
+    global citic365headers1,citic365data1
     print("\n正在运行中信365\n")
     citic365headers1 = {
       "Host":"mtp.creditcard.ecitic.com",
       "User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36",
       "X-Requested-With":"XMLHttpRequest",
       "Connection":"keep-alive",
-      "Content-Type":"application/json; charset=utf-8"
+      "Content-Type":"application/json; charset=utf-8",
+      "Cookie":"%s"%(linecache.getline(r"citic3651cfg.set",26).strip())
       }
-    citic365cookies1 = {"Cookies":"%s"%(linecache.getline(r"citic3651cfg.set",26).strip())}
     self.Citic365LocalGoods1()
     for files in os.walk(os.getcwd()):
       if re.findall("Citic3651的商品 %s.*\.ordered"%(citic365skun1),str(files),flags=re.I) !=[]:
@@ -330,7 +322,7 @@ class Citic3651():
     citic365data1 = {"skuId":"%s"%(citic365skuid1),"skuNum":1}
     try:
       citic365logincj1 = requests.get("https://mtp.creditcard.ecitic.com/citiccard/mtp-locallife-app/epay-order/list",
-                                      headers=citic365headers1,cookies=citic365cookies1,timeout=3).json()
+                                      headers=citic365headers1,timeout=3).json()
       if citic365logincj1.get("retMsg") == "处理成功":pass
       elif citic365logincj1.get("result") == "time out":
         print("中信登录状态失效了,请重新获取Cookie")
@@ -367,7 +359,7 @@ class CCBSatProd1():
       ccbsatpdata1 = {"gtSeccode":"%s"%(linecache.getline(r"ccbsat1cfg.set",29).strip()),"requestId":"%s"%(int(time.time()*1000)),
                               "prodId":"%s"%(ccbsatprodid1),"activityId":"1209385000359522304"}
       ccbsatporderj1 = requests.post("https://dragoncard.e-mallchina.com.cn/js/api/order/orderSeckill/seckillCreateOrder",
-                                                        headers=ccbsatpheaders1,cookies=ccbsatpcookies1,json=ccbsatpdata1,
+                                                        headers=ccbsatpheaders1,json=ccbsatpdata1,
                                                         timeout=float(linecache.getline(r"ccbsat1cfg.set",19).strip()),verify=False).json()
       ccbsatporders1 = ccbsatporderj1["returnDesc"]
     except:
@@ -408,14 +400,14 @@ class CCBSatProd1():
       self.CCBOrdering1()
 
   def CCBSatPMain1(self):
-    global ccbsatpheaders1,ccbsatpcookies1
+    global ccbsatpheaders1
     print("\n正在运行龙卡星期六\n")
     ccbsatpheaders1 =  {
       "user-agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36",
       "token":"%s"%(linecache.getline(r"ccbsat1cfg.set",27).strip()),
-      "content-type":"application/json; charset=UTF-8"
+      "content-type":"application/json; charset=UTF-8",
+      "Cookie":"%s"%(linecache.getline(r"ccbsat1cfg.set",31).strip())
       }
-    ccbsatpcookies1 = {"Cookies":"%s"%(linecache.getline(r"ccbsat1cfg.set",31).strip())}
     self.CCBLocalSatP1()
     for files in os.walk(os.getcwd()):
       if re.findall("CCBSatP1的商品 %s.*\.ordered"%(ccbsatprodn1),str(files),flags=re.I) != []:
@@ -443,10 +435,10 @@ class JDCoupon1():
       global jdgetcoupons1
       if jdcproleid1 != "0":
         jdgetcouponj1 = requests.get('http://api.m.jd.com/client.action?functionId=newBabelAwardCollection&client=wh5&body={"activityId":"%s","scene":"1","args":"key=%s,roleId=%s"}'%(jdcpactid1,jdcpkeyid1,jdcproleid1),
-                                                    headers=jdheaders1,cookies=jdcookies1,timeout=float(linecache.getline(r"jdgetc1cfg.set",22).strip())).json()
+                                                    headers=jdheaders1,timeout=float(linecache.getline(r"jdgetc1cfg.set",22).strip())).json()
       else:
         jdgetcouponj1 = requests.get('http://api.m.jd.com/client.action?functionId=newBabelAwardCollection&client=wh5&body={"activityId":"%s","scene":"3","actKey":"%s"}'%(jdcpactid1,jdcpkeyid1),
-                                                    headers=jdheaders1,cookies=jdcookies1,timeout=float(linecache.getline(r"jdgetc1cfg.set",22).strip())).json()
+                                                    headers=jdheaders1,timeout=float(linecache.getline(r"jdgetc1cfg.set",22).strip())).json()
       if re.findall(r"subCodeMsg",str(jdgetcouponj1),flags=re.I) != []:
         jdgetcoupons1 = jdgetcouponj1["subCodeMsg"]
       else:
@@ -459,7 +451,7 @@ class JDCoupon1():
       global jdtime1
       jdtimes1 = requests.get("https://a.jd.com//ajax/queryServerData.html",
                                             headers=jdheaders1,timeout=1).json()["serverTime"]
-      jdtime1 = time.strftime("%H:%M:%S",time.localtime(jdtimes1/1000))+"."+str(jdtimes1)[-3:]
+      jdtime1 = datetime.datetime.fromtimestamp(jdtimes1/1000).strftime("%H:%M:%S.%f")[:-3]
     except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
       self.JDGettime1()
 
@@ -469,17 +461,17 @@ class JDCoupon1():
       jdgcftimes1 = 1
       if int(linecache.getline(r"jdgetc1cfg.set",12).strip()) == 1:
         jdrushtime1 = linecache.getline(r"jdgetc1cfg.set",13).strip()
-        jdwaittime1 = (datetime.datetime.strptime(jdrushtime1,"%H:%M:%S.%f")+datetime.timedelta(minutes=-30)).strftime("%H:%M:%S")
-        jdrushtime11 = (datetime.datetime.strptime(jdrushtime1,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S")
+        jdwaittime1 = (datetime.datetime.strptime(jdrushtime1,"%H:%M:%S.%f")+datetime.timedelta(minutes=-30)).strftime("%H:%M:%S.%f")[:-3]
+        jdrushtime11 = (datetime.datetime.strptime(jdrushtime1,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S.%f")[:-3]
         self.JDGettime1()
         if jdtime1 > jdwaittime1 and jdtime1 < jdrushtime1:
           print("请勿关闭,程序将在 %s 开抢"%(jdrushtime1))
-          while jdtime1 < jdrushtime1:
-            self.JDGettime1()
-            if jdtime1 > jdwaittime1 and jdtime1 < jdrushtime11:
+          while jdtime1 > jdwaittime1 and jdtime1 < jdrushtime1:
+            if jdtime1 < jdrushtime11:
               time.sleep(30)
             else:
               time.sleep(0.01)
+            self.JDGettime1()
           time.sleep(float(linecache.getline(r"jdgetc1cfg.set",15).strip()))
       self.JDGetCoupons1()
       while re.findall(r"领取成功",str(jdgetcoupons1)) == []:
@@ -509,10 +501,10 @@ class JDCoupon1():
       self.JDCGetting1()
 
   def JDCouponMain1(self):
-    global jdheaders1,jdcookies1,jdcpactid1,jdcpkeyid1,jdcproleid1
+    global jdheaders1,jdcpactid1,jdcpkeyid1,jdcproleid1
     print("\n正在运行京东抢任意优惠券\n")
-    jdheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36"}
-    jdcookies1 = {"Cookies":"%s"%(linecache.getline(r"jdgetc1cfg.set",30).strip())}
+    jdheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36",
+                          "Cookie":"%s"%(linecache.getline(r"jdgetc1cfg.set",30).strip())}
     jdcpactid1 = linecache.getline(r"jdgetc1cfg.set",5).strip()
     jdcpkeyid1 = linecache.getline(r"jdgetc1cfg.set",7).strip()
     jdcproleid1 = linecache.getline(r"jdgetc1cfg.set",9).strip()
