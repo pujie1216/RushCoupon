@@ -86,7 +86,7 @@ class Unifri1():
 
   def UnifriLocalGoods1(self):
     global unifrigoodsn1,unifrigoodsid1,unifripaypri1,unifrigoodsbt1
-    unifrigoodsid1 = linecache.getline(r"unifri1cfg.set",22).strip()
+    unifrigoodsid1 = linecache.getline(r"unifri1cfg.set",24).strip()
     if unifrigoodsid1 == "8a29ac8a72a48dbe0172bb4885430d81":
       unifrigoodsn1 = "美团5元"
       unifripaypri1 = "2.00"
@@ -116,7 +116,7 @@ class Unifri1():
       global unifriorders1
       unifriorderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/api/bj2402/v1",
                                                    headers=unifriheaders1,params=unifridata1,
-                                                   timeout=float(linecache.getline(r"unifri1cfg.set",30).strip())).json()
+                                                   timeout=float(linecache.getline(r"unifri1cfg.set",32).strip())).json()
       unifriorders1 = unifriorderj1["msg"]
     except:
       self.UnifriGetOrders1()
@@ -132,7 +132,7 @@ class Unifri1():
 
   def UnifriOrdering1(self):
     try:
-      unifriftime1 = linecache.getline(r"unifri1cfg.set",27).strip()
+      unifriftime1 = linecache.getline(r"unifri1cfg.set",29).strip()
       unifriftimes1 = 1
       if int(linecache.getline(r"unifri1cfg.set",15).strip()) == 1:
         unifrirt1 = []
@@ -142,8 +142,9 @@ class Unifri1():
             unifrirt1.append(timef)
         self.UnifriGettime1()
         for timef in unifrirt1:
-          unifriwt1 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-30)).strftime("%H:%M:%S.%f")[:-3]
-          if unifritime1 > unifriwt1 and unifritime1 < timef:
+          unifriwm1 = linecache.getline(r"unifri1cfg.set",17).strip()
+          unifriwt1 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-int(unifriwm1))).strftime("%H:%M:%S.%f")[:-3]
+          if unifritime1 >= unifriwt1 and unifritime1 < timef:
             print("请勿关闭,程序将在 %s 开抢"%(timef))
             while unifritime1 > unifriwt1 and unifritime1 < timef:
               unifriwt11 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S.%f")[:-3]
@@ -152,7 +153,7 @@ class Unifri1():
               else:
                 time.sleep(0.01)
               self.UnifriGettime1()
-        time.sleep(float(linecache.getline(r"unifri1cfg.set",17).strip()))
+        time.sleep(float(linecache.getline(r"unifri1cfg.set",19).strip()))
       self.UnifriGetOrders1()
       while re.findall(r"下单成功",str(unifriorders1)) == []:
         print("返回信息: "+unifriorders1)
@@ -167,14 +168,14 @@ class Unifri1():
           try:
             unifriwporderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/show/bj3034/v1",
                                                    headers=unifriheaders1,params="reqsn=&reqtime=0&cliver=&reqdata=%7B%7D",
-                                                   timeout=float(linecache.getline(r"unifri1cfg.set",30).strip())).json()
+                                                   timeout=float(linecache.getline(r"unifri1cfg.set",32).strip())).json()
             unifriwporders1 = unifriwporderj1["resdata"]["orderCount"]["wait_pay_order"]
             if int(unifriwporders1) > 0:
               print("该账号有未支付订单,请尽快支付,逾期将失效哦")
-              if int(linecache.getline(r"unifri1cfg.set",33).strip()) == 1:
+              if int(linecache.getline(r"unifri1cfg.set",35).strip()) == 1:
                 times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
                 requests.get("https://sc.ftqq.com/%s.send?text=%s Unifri1的账号有未支付订单,请尽快支付,逾期将失效哦"\
-                            %(linecache.getline(r"unifri1cfg.set",35).strip(),times))
+                            %(linecache.getline(r"unifri1cfg.set",37).strip(),times))
               AllinOneExit1()
           except:pass
         print("没有下单成功,将在%s秒后第%s次刷新"%(unifriftime1,unifriftimes1))
@@ -184,23 +185,23 @@ class Unifri1():
       with open("Unifri1的商品 "+unifrigoodsn1+" "+\
                       time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"下单成功.ordered","w") as ordered:
         print("已记录Unifri1的商品:%s 下单成功时间"%(unifrigoodsn1))
-      if int(linecache.getline(r"unifri1cfg.set",33).strip()) == 1:
+      if int(linecache.getline(r"unifri1cfg.set",35).strip()) == 1:
         times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
         requests.get("https://sc.ftqq.com/%s.send?text=%s %s 下单成功,请尽快在30分钟内支付,逾期将失效哦"\
-                            %(linecache.getline(r"unifri1cfg.set",35).strip(),times,unifrigoodsn1))
+                            %(linecache.getline(r"unifri1cfg.set",37).strip(),times,unifrigoodsn1))
       AllinOneExit1()
     except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
       self.UnifriOrdering1()
   
   def UnifriMain1(self):
     global unifriheaders1,unifridata1
-    rechangeno1 = linecache.getline(r"unifri1cfg.set",24).strip()
+    rechangeno1 = linecache.getline(r"unifri1cfg.set",26).strip()
     print("\n正在运行联通超级星期五\n当前配置的对应手机号为: %s\n"%(rechangeno1))
     unifriheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/\
                                 537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36; \
                                 unicom{version:android@7.0500}",
-                                "Cookie":"%s"%(linecache.getline(r"unifri1cfg.set",38).strip())}
-    if int(linecache.getline(r"unifri1cfg.set",20).strip()) == 1:
+                                "Cookie":"%s"%(linecache.getline(r"unifri1cfg.set",40).strip())}
+    if int(linecache.getline(r"unifri1cfg.set",22).strip()) == 1:
       self.UnifriLocalGoods1()
       unifrigoodsq1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/get619Activity/v1?whetherFriday=YES",
                                                      headers=unifriheaders1,timeout=3).json()
@@ -569,7 +570,7 @@ def AllinOneMain1():
 
 try:
   unifrilines1 = len(open(r"unifri1cfg.set",errors="ignore",encoding="UTF-8").readlines())
-  if unifrilines1 != 38:
+  if unifrilines1 != 40:
     print("出错了, unifri1cfg.set 的行数不对哦")
     AllinOneExit1()
 except FileNotFoundError:
