@@ -118,7 +118,11 @@ class Unifri1():
                                                    headers=unifriheaders1,params=unifridata1,
                                                    timeout=float(linecache.getline(r"unifri1cfg.set",32).strip())).json()
       unifriorders1 = unifriorderj1["msg"]
+    except KeyboardInterrupt:
+      print("用户中断操作")
+      AllinOneExit1()
     except:
+      print(("可能网络出错了, %s 正在重新尝试下单"%(datetime.datetime.now().strftime("%M:%S"))).ljust(50),end="\r")
       self.UnifriGetOrders1()
 
   def UnifriGettime1(self):
@@ -128,6 +132,7 @@ class Unifri1():
                                                 headers=unifriheaders1,timeout=1).json()["resdata"]["currentTime"]
       unifritime1 = time.strftime("%H:%M:%S",time.localtime(unifritimes1/1000))+"."+str(unifritimes1)[-3:]
     except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
+      print(("可能网络出错了, %s 正在重新尝试对时"%(datetime.datetime.now().strftime("%M:%S"))).ljust(50),end="\r")
       self.UnifriGettime1()
 
   def UnifriOrdering1(self):
@@ -144,27 +149,29 @@ class Unifri1():
         for timef in unifrirt1:
           unifriwm1 = linecache.getline(r"unifri1cfg.set",17).strip()
           unifriwt1 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-int(unifriwm1))).strftime("%H:%M:%S.%f")[:-3]
+          unifriwt11 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S.%f")[:-3]
           if unifritime1 >= unifriwt1 and unifritime1 < timef:
             print("请勿关闭,程序将在 %s 开抢"%(timef))
             while unifritime1 > unifriwt1 and unifritime1 < timef:
-              unifriwt11 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S.%f")[:-3]
               if unifritime1 < unifriwt11:
+                print("当前联通的时间是: %s ,每隔30秒刷新时间"%(unifritime1),end="\r")
                 time.sleep(30)
               else:
+                print("当前联通的时间是: %s ,每隔0.01秒刷新时间"%(unifritime1),end="\r")
                 time.sleep(0.01)
               self.UnifriGettime1()
         time.sleep(float(linecache.getline(r"unifri1cfg.set",19).strip()))
       self.UnifriGetOrders1()
       while re.findall(r"下单成功",str(unifriorders1)) == []:
-        print("返回信息: "+unifriorders1)
+        print(("返回信息: "+unifriorders1).ljust(50),end="\r")
         if re.findall(r"达到上限|数量限制|次数限制",str(unifriorders1)) != []:
           print("返回信息: "+unifriorders1)
           print("该账号已有订单,不能再次购买\n")
           AllinOneExit1()
-        elif re.findall(r"下单成功",str(unifriorders1)) != []:
+        elif re.findall(r"下单成功|存在未支付的订单",str(unifriorders1)) != []:
           break
         unifriftimes1 += 1
-        if unifriftimes1 % 50 == 0:
+        if unifriftimes1 % 20 == 0:
           try:
             unifriwporderj1 = requests.post("https://m.client.10010.com/welfare-mall-front/mobile/show/bj3034/v1",
                                                    headers=unifriheaders1,params="reqsn=&reqtime=0&cliver=&reqdata=%7B%7D",
@@ -178,7 +185,7 @@ class Unifri1():
                             %(linecache.getline(r"unifri1cfg.set",37).strip(),times))
               AllinOneExit1()
           except:pass
-        print("没有下单成功,将在%s秒后第%s次刷新"%(unifriftime1,unifriftimes1))
+        print(("没有下单成功,将在%s秒后第%s次刷新"%(unifriftime1,unifriftimes1)).ljust(50),end="\r")
         time.sleep(float(unifriftime1))
         self.UnifriGetOrders1()
       print("%s 已下单成功,请尽快在30分钟内支付,逾期将失效哦"%(unifrigoodsn1))
@@ -199,7 +206,7 @@ class Unifri1():
     print("\n正在运行联通超级星期五\n当前配置的对应手机号为: %s\n"%(rechangeno1))
     unifriheaders1 = {"User-Agent":"Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/\
                                 537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36; \
-                                unicom{version:android@7.0500}",
+                                unicom{version:android@8.0000}",
                                 "Cookie":"%s"%(linecache.getline(r"unifri1cfg.set",40).strip())}
     if int(linecache.getline(r"unifri1cfg.set",22).strip()) == 1:
       self.UnifriLocalGoods1()
@@ -217,7 +224,8 @@ class Unifri1():
     unifridata1 = 'reqsn=&reqtime=&cliver=&reqdata={"goodsId":"%s","payWay":"01",'\
                          '"amount":"%s","reChangeNo":"%s","saleTypes":"C","points":"0","beginTime":"%s",'\
                          '"imei":"undefined","sourceChannel":"","proFlag":"","scene":"","pormoterCode":"",'\
-                         '"maxcash":"","floortype":"undefined"}'%(unifrigoodsid1,unifripaypri1,rechangeno1,unifrigoodsbt1)
+                         '"oneid":"","twoid":"","threeid":"","maxcash":"","floortype":"undefined",'\
+                         '"launchId":""}'%(unifrigoodsid1,unifripaypri1,rechangeno1,unifrigoodsbt1)
     self.UnifriGetOrders1()
     if re.findall(r"已结束",str(unifriorders1)) != []:
       print("返回信息: "+unifriorders1)
@@ -232,7 +240,9 @@ class Unifri1():
     elif re.findall(r"商品信息不存在",str(unifriorders1)) != []:
       print("返回信息: "+unifriorders1)
       print("可能未到活动当天哦,请注意使用\n")
-    time.sleep(5)
+    for i in range(5,0,-1):
+      print("倒计时 %s 秒"%(i),end="\r")
+      time.sleep(1)
     self.UnifriOrdering1()
     
 class Citic3651():
@@ -333,6 +343,9 @@ class Citic3651():
         AllinOneExit1()
     except (requests.exceptions.Timeout,requests.exceptions.ConnectionError):
       self.Citic365Main1()
+    for i in range(5,0,-1):
+      print("倒计时 %s 秒"%(i),end="\r")
+      time.sleep(1)
     self.Citic365Ordering1()
 
 class CCBSatProd1():
@@ -382,8 +395,7 @@ class CCBSatProd1():
           print("返回信息: %s\n建行登录状态失效了,请重新获取Cookie"%(ccbsatporders1))
           AllinOneExit1()
         elif re.findall(r"\?{3,}",str(ccbsatporders1)) != []:
-          print("返回信息: %s\n可能被盾了,再次尝试后没有返回任何信息则请过一段时间再尝试"%(ccbsatporders1))
-          AllinOneExit1()
+          print("返回信息: %s\n系统繁忙,可能被盾了,较多次尝试后依然返回这个信息则关闭该程序一段时间后再重新打开"%(ccbsatporders1))
         ccbsatpftimes1 += 1
         print("没有下单成功,将在%s秒后第%s次刷新"%(ccbsatpftime1,ccbsatpftimes1))
         time.sleep(float(ccbsatpftime1))
@@ -427,7 +439,9 @@ class CCBSatProd1():
       ccbsatask1 = input()
       if ccbsatask1.lower() == "e":
         AllinOneExit1()
-    time.sleep(5)
+    for i in range(5,0,-1):
+      print("倒计时 %s 秒"%(i),end="\r")
+      time.sleep(1)
     self.CCBOrdering1()
 
 class JDCoupon1():
@@ -530,7 +544,9 @@ class JDCoupon1():
     elif re.findall(r"来太晚了|结束",str(jdgetcoupons1)) != []:
       print("返回信息: %s\n来晚了,券已过期"%(jdgetcoupons1))
       AllinOneExit1()
-    time.sleep(5)
+    for i in range(5,0,-1):
+      print("倒计时 %s 秒"%(i),end="\r")
+      time.sleep(1)
     self.JDCGetting1()
 
 def AllinOneMain1():
