@@ -111,6 +111,40 @@ class Unifri1():
     unifrigoodsbt1 = "0"
     print("已选择商品: %s\n对应商品ID: %s\n"%(unifrigoodsn1,unifrigoodsid1))
 
+  def UnifriGettime1(self):
+    try:
+      global unifritime1
+      unifritimes1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/getCurrentTimeMillis/v2",
+                                                headers=unifriheaders1,timeout=1).json()["resdata"]["currentTime"]
+      unifritime1 = time.strftime("%H:%M:%S",time.localtime(unifritimes1/1000))+"."+str(unifritimes1)[-3:]
+    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
+      print(("可能网络出错了, %s 正在重新尝试对时"%(datetime.datetime.now().strftime("%M:%S"))).ljust(50),end="\r")
+      self.UnifriGettime1()
+
+  def UnifriTiming1(self):
+    unifrirt1 = []
+    for times in unifrigoodsbtl1:
+      timef = datetime.datetime.fromtimestamp(times/1000).strftime("%H:%M:%S.%f")[:-3]
+      if not timef in unifrirt1:
+        unifrirt1.append(timef)
+    self.UnifriGettime1()
+    for timef in unifrirt1:
+      unifriet1 = linecache.getline(r"unifri1cfg.set",19).strip()
+      unifriwm1 = linecache.getline(r"unifri1cfg.set",17).strip()
+      unifriwt1 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-int(unifriwm1))).strftime("%H:%M:%S.%f")[:-3]
+      unifriwt11 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S.%f")[:-3]
+      if unifritime1 >= unifriwt1 and unifritime1 < timef:
+        timef = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(milliseconds=-int(unifriet1))).strftime("%H:%M:%S.%f")[:-3]
+        print("请勿关闭,程序将在 %s 开抢"%(timef))
+        while unifritime1 > unifriwt1 and unifritime1 < timef:
+          if unifritime1 < unifriwt11:
+            print("当前联通的时间是: %s ,每隔30秒刷新时间"%(unifritime1),end="\r")
+            time.sleep(30)
+          else:
+            print("当前联通的时间是: %s ,每隔0.01秒刷新时间"%(unifritime1),end="\r")
+            time.sleep(0.01)
+          self.UnifriGettime1()
+
   def UnifriGetOrders1(self):
     try:
       global unifriorders1
@@ -125,44 +159,10 @@ class Unifri1():
       print(("可能网络出错了, %s 正在重新尝试下单"%(datetime.datetime.now().strftime("%M:%S"))).ljust(50),end="\r")
       self.UnifriGetOrders1()
 
-  def UnifriGettime1(self):
-    try:
-      global unifritime1
-      unifritimes1 = requests.get("https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/getCurrentTimeMillis/v2",
-                                                headers=unifriheaders1,timeout=1).json()["resdata"]["currentTime"]
-      unifritime1 = time.strftime("%H:%M:%S",time.localtime(unifritimes1/1000))+"."+str(unifritimes1)[-3:]
-    except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
-      print(("可能网络出错了, %s 正在重新尝试对时"%(datetime.datetime.now().strftime("%M:%S"))).ljust(50),end="\r")
-      self.UnifriGettime1()
-
   def UnifriOrdering1(self):
     try:
       unifriftime1 = linecache.getline(r"unifri1cfg.set",31).strip()
       unifriftimes1 = 1
-      if int(linecache.getline(r"unifri1cfg.set",15).strip()) == 1:
-        unifrirt1 = []
-        for times in unifrigoodsbtl1:
-          timef = datetime.datetime.fromtimestamp(times/1000).strftime("%H:%M:%S.%f")[:-3]
-          if not timef in unifrirt1:
-            unifrirt1.append(timef)
-        self.UnifriGettime1()
-        for timef in unifrirt1:
-          unifriet1 = linecache.getline(r"unifri1cfg.set",19).strip()
-          unifriwm1 = linecache.getline(r"unifri1cfg.set",17).strip()
-          unifriwt1 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-int(unifriwm1))).strftime("%H:%M:%S.%f")[:-3]
-          unifriwt11 = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(minutes=-1)).strftime("%H:%M:%S.%f")[:-3]
-          if unifritime1 >= unifriwt1 and unifritime1 < timef:
-            timef = (datetime.datetime.strptime(timef,"%H:%M:%S.%f")+datetime.timedelta(milliseconds=-int(unifriet1))).strftime("%H:%M:%S.%f")[:-3]
-            print("请勿关闭,程序将在 %s 开抢"%(timef))
-            while unifritime1 > unifriwt1 and unifritime1 < timef:
-              if unifritime1 < unifriwt11:
-                print("当前联通的时间是: %s ,每隔30秒刷新时间"%(unifritime1),end="\r")
-                time.sleep(30)
-              else:
-                print("当前联通的时间是: %s ,每隔0.01秒刷新时间"%(unifritime1),end="\r")
-                time.sleep(0.01)
-              self.UnifriGettime1()
-        time.sleep(float(linecache.getline(r"unifri1cfg.set",21).strip()))
       self.UnifriGetOrders1()
       while re.findall(r"下单成功",str(unifriorders1)) == []:
         print(("返回信息: "+unifriorders1).ljust(50),end="\r")
@@ -195,15 +195,6 @@ class Unifri1():
         print(("没有下单成功,将在%s秒后第%s次刷新"%(unifriftime1,unifriftimes1)).ljust(50),end="\r")
         time.sleep(float(unifriftime1))
         self.UnifriGetOrders1()
-      print("%s 已下单成功,请尽快在30分钟内支付,逾期将失效哦"%(unifrigoodsn1))
-      with open("Unifri1的商品 "+unifrigoodsn1+" "+\
-                      time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"下单成功.ordered","w") as ordered:
-        print("已记录Unifri1的商品:%s 下单成功时间"%(unifrigoodsn1))
-      if int(linecache.getline(r"unifri1cfg.set",37).strip()) == 1:
-        times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
-        requests.get("https://sc.ftqq.com/%s.send?text=%s %s 下单成功,请尽快在30分钟内支付,逾期将失效哦"\
-                            %(linecache.getline(r"unifri1cfg.set",39).strip(),times,unifrigoodsn1))
-      AllinOneExit1()
     except (requests.exceptions.Timeout,requests.exceptions.ConnectionError,ValueError):
       self.UnifriOrdering1()
   
@@ -233,6 +224,8 @@ class Unifri1():
                          '"imei":"undefined","sourceChannel":"","proFlag":"","scene":"","pormoterCode":"",'\
                          '"oneid":"","twoid":"","threeid":"","maxcash":"","floortype":"undefined",'\
                          '"launchId":""}'%(unifrigoodsid1,unifripaypri1,rechangeno1,unifrigoodsbt1)
+    #由于联通限制连续点击抢购,所以抢购前不再检测抢购状态,以下代码就注释掉了,如有需要,自行考虑开启
+    """
     self.UnifriGetOrders1()
     if re.findall(r"已结束",str(unifriorders1)) != []:
       print("返回信息: "+unifriorders1)
@@ -250,7 +243,39 @@ class Unifri1():
     for i in range(5,0,-1):
       print("倒计时 %s 秒"%(i),end="\r")
       time.sleep(1)
-    self.UnifriOrdering1()
+    """
+    unifriask2 = input("一次下单不成功后是否需要捡漏,是 输入 y 后按确定,否 直接按确定:")
+    if unifriask2.lower() == "y":
+      if int(linecache.getline(r"unifri1cfg.set",15).strip()) == 1:
+        self.UnifriTiming1()
+        time.sleep(float(linecache.getline(r"unifri1cfg.set",21).strip()))
+      self.UnifriOrdering1()
+      print("%s 已下单成功,请尽快在30分钟内支付,逾期将失效哦"%(unifrigoodsn1))
+      with open("Unifri1的商品 "+unifrigoodsn1+" "+\
+                      time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"下单成功.ordered","w") as ordered:
+        print("已记录Unifri1的商品:%s 下单成功时间"%(unifrigoodsn1))
+      if int(linecache.getline(r"unifri1cfg.set",37).strip()) == 1:
+        times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
+        requests.get("https://sc.ftqq.com/%s.send?text=%s %s 下单成功,请尽快在30分钟内支付,逾期将失效哦"\
+                            %(linecache.getline(r"unifri1cfg.set",39).strip(),times,unifrigoodsn1))
+    else:
+      if int(linecache.getline(r"unifri1cfg.set",15).strip()) == 1:
+        self.UnifriTiming1()
+        time.sleep(float(linecache.getline(r"unifri1cfg.set",21).strip()))
+      self.UnifriGetOrders1()
+      if re.findall(r"下单成功",str(unifriorders1)) != []:
+        print("%s 已下单成功,请尽快在30分钟内支付,逾期将失效哦"%(unifrigoodsn1))
+        with open("Unifri1的商品 "+unifrigoodsn1+" "+\
+                      time.strftime("%H{}%M{}%S{}").format("时","分","秒")+"下单成功.ordered","w") as ordered:
+          print("已记录Unifri1的商品:%s 下单成功时间"%(unifrigoodsn1))
+        if int(linecache.getline(r"unifri1cfg.set",37).strip()) == 1:
+          times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
+          requests.get("https://sc.ftqq.com/%s.send?text=%s %s 下单成功,请尽快在30分钟内支付,逾期将失效哦"\
+                            %(linecache.getline(r"unifri1cfg.set",39).strip(),times,unifrigoodsn1))
+      else:
+        print("返回信息: %s"%(unifriorders1))
+        time.sleep(30)
+    AllinOneExit1()
     
 class Citic3651():
   def Citic365LocalGoods1(self):
