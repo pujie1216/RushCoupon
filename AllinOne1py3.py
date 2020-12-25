@@ -40,11 +40,11 @@ class Unifri1():
     unifripaypril1 = []
     unifrigoodsbtl1 = []
     a = 0
-    unifristate1 = {"00":"暂未开始","10":"立即抢购","20":"去查看","30":"无法抢购","40":"已抢光","50":"未开始"}
+    unifristate1 = {"00":"暂未开始","10":"立即抢购","20":"去查看","30":"无法抢购","40":"已抢光","50":"未开始","60":"处理中"}
     for b in range(0,len(unifritabL1)):
       for i,goods in enumerate(unifritabL1[b]["goodsList"],a+1):
         unifrigoodsnl11.append(str(i)+" "+unifritabL1[b]["timeNav"]+\
-                                              unifristate1.get(goods["state"])+" "+goods["goodsName"])
+                                              unifristate1.get(goods["state"],"未知状态")+" "+goods["goodsName"])
         unifrigoodsnl1.append(goods["goodsName"])
         nowdate1 = time.strftime("%Y-%m-%d",time.localtime(int(time.time())))
         actLtimes1 = int(time.mktime(time.strptime(nowdate1+" "+unifritabL1[b]["timeNav"]+":00",
@@ -189,7 +189,7 @@ class Unifri1():
                     times = time.strftime("%H{}%M{}%S{}").format("时","分","秒")   #加入时间,避免造成重复消息导致Server酱无法推送
                     requests.get("https://sc.ftqq.com/%s.send?text=%s Unifri1的账号有未支付订单,请尽快支付,逾期将失效哦"\
                             %(linecache.getline(r"unifri1cfg.set",39).strip(),times))
-                    with open(time.strftime("%H{}%M{}%S{}").format("时","分","秒")+" 提醒过未支付订单了.reminded","w") as ordered:
+                    with open(time.strftime("%H{}%M{}%S{}").format("时","分","秒")+" 提醒过未支付订单了 不删除该文件一直不会提醒的.reminded","w") as ordered:
                       pass
           except:pass
         print(("没有下单成功,将在%s秒后第%s次刷新"%(unifriftime1,unifriftimes1)).ljust(50),end="\r")
