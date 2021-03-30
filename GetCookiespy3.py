@@ -6,13 +6,25 @@ import time
 try:
   import requests
 except (ImportError,ModuleNotFoundError):
-  print("请先安装 requests 库哦,5秒后自动退出")
+  print("请先安装 requests 模块哦,5秒后自动退出")
   time.sleep(5)
   sys.exit()
 try:
   import rsa
 except (ImportError,ModuleNotFoundError):
-  print("请先安装 rsa 库哦,5秒后自动退出")
+  print("请先安装 rsa 模块哦,5秒后自动退出")
+  time.sleep(5)
+  sys.exit()
+try:
+  import qrcode
+except (ImportError,ModuleNotFoundError):
+  print("请先安装 qrcode 模块哦,5秒后自动退出")
+  time.sleep(5)
+  sys.exit()
+try:
+  from PIL import Image
+except (ImportError,ModuleNotFoundError):
+  print("请先安装 Pillow 模块哦,5秒后自动退出")
   time.sleep(5)
   sys.exit()
 import os
@@ -74,7 +86,7 @@ class UniCookies():
       uniscparams = "mobile=%s&version=android%%408.0002&keyVersion="%(quob64encunimob)
       try:
         unisrcode = requests.post("https://m.client.10010.com/mobileService/sendRadomNum.htm",
-                                  headers=uniheaders,data=uniscparams,timeout=10)
+                                  headers=uniheaders,data=uniscparams,timeout=5)
         unisrcodes = ast.literal_eval(unisrcode.content.decode("utf-8"))["rsp_desc"]
         if re.findall(r"验证码已发送",unisrcodes) != []:
           print("\n返回信息: "+unisrcodes)
@@ -103,7 +115,7 @@ class UniCookies():
                   %(quob64encunimob,uuidstr,uuidstr,quob64encunirpw,unitimes)
     try:
       unilogin = requests.post("https://m.client.10010.com/mobileService/radomLogin.htm",
-                               headers=uniheaders,data=unilgparams,timeout=10)
+                               headers=uniheaders,data=unilgparams,timeout=5)
       unilogins = ast.literal_eval(unilogin.content.decode("utf-8"))
       if re.findall(r"proName",str(unilogins),flags=re.I) != []:
         print("\n返回登录成功信息:\n%s省 %s市 %s\n"\
@@ -136,12 +148,75 @@ class UniCookies():
     time.sleep(30)
     sys.exit()
 
-class JDCookies():
-  def JDLogin(self):
+class JDMobCookies():
+  def JDMobLogin(self):
+    jdheaders = {"User-Agent": "Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36",
+                 "Referer": "https://plogin.m.jd.com/login/login?appid=300"}
+    jdgetstoken = requests.get("https://plogin.m.jd.com/cgi-bin/mm/new_login_entrance?lang=chs&appid=300",headers=jdheaders,timeout=5)
+    stoken = jdgetstoken.json()["s_token"]
+    jdsetcookiesd = requests.utils.dict_from_cookiejar(jdgetstoken.cookies)
+    jdsetcookiesl = []
+    for jdsetcookie in jdsetcookiesd:
+      jdsetcookiesl.append(jdsetcookie+"="+jdsetcookiesd.get(jdsetcookie))
+    jdsetcookies = ";".join(jdsetcookiesl)
+    jdheaders["Cookie"] = jdsetcookies
+    jdgettoken = requests.get("https://plogin.m.jd.com/cgi-bin/m/tmauthreflogurl?lang=chs&appid=300&s_token=%s&remember=true"%(stoken),headers=jdheaders,timeout=5)
+    token = jdgettoken.json()["token"]
+    jdsetcookiesd = requests.utils.dict_from_cookiejar(jdgettoken.cookies)
+    okltoken = jdsetcookiesd.get("okl_token")
+    qrcodeb = qrcode.make("https://plogin.m.jd.com/cgi-bin/m/tmauth?appid=300&client_type=m&token=%s"%(token))
+    qrcodeb.save("JDMobQRcode.png")
+    print("\n二维码图片 JDMobQRcode.png 已生成到该目录下,请后台运行程序,电脑打开图片后用京东APP扫码登录\n"\
+          "手机端操作在提示扫码时选择本地图片即可\n"\
+          "Android需要系统更新图库信息才能看到图片,可以选择不删除图片,不然下次又得等系统更新图库信息了\n"\
+          "iOS需要先将图片保存到相簿且需要手动清理相簿里的登录二维码,否则很难知道哪个是哪个的\n")
+    if sys.platform == "win32":
+      os.system('start "" "JDMobQRcode.png"')
+    elif sys.platform == "darwin":
+      os.system('open "JDMobQRcode.png"')
+    else:
+      os.system('xdg-open "JDMobQRcode.png"')
+
+    while True:
+      jdcheckqrp = requests.get("https://plogin.m.jd.com/cgi-bin/m/tmauthchecktoken?lang=chs&appid=300&returnurl=&token=%s&ou_state=0&okl_token=%s"%(token,okltoken),
+                                headers=jdheaders,timeout=5)
+      jdcheckqrj = jdcheckqrp.json()
+      if jdcheckqrj["errcode"] == 176:
+        print(jdcheckqrj["message"])
+      elif jdcheckqrj["errcode"] == 0:
+        print("\n登录成功,可以关闭京东APP了...\n")
+        return jdcheckqrp
+      elif jdcheckqrj["errcode"] == 21:
+        print("返回信息: %s\n是否重新获取二维码,手机端操作需要先完全关闭京东APP哦"%(jdcheckqrj["message"]))
+        jdqrcask = input("是 直接按确定继续,否 输入 n 然后按确定退出:")
+        if jdqrcask.lower() == "n":
+          GetCookiesExit1()
+        else:
+          return self.JDMobLogin()
+      else:
+        print("返回信息: %s\n未遇到过的错误"%(jdcheckqrj["message"]))
+      time.sleep(3)
+
+  def JDMobLogined(self):
+    jdcheckqrp = self.JDMobLogin()
+    jdcookiesd = requests.utils.dict_from_cookiejar(jdcheckqrp.cookies)
+    jdcookiesl = []
+    for jdcookie in jdcookiesd:
+      jdcookiesl.append(jdcookie+"="+jdcookiesd.get(jdcookie))
+    jdstrcookies = ";".join(jdcookiesl)
+    print("%s Cookies获取成功,将以下内容复制粘贴到需要的地方即可,同时已在该目录下生成一个 .cookies 文件(一般的打开文本类程序即可查看修改),30秒后自动退出程序\n%s"\
+          %(jdcookiesd["pt_pin"],jdstrcookies))
+    with open(jdcookiesd["pt_pin"]+" JDMob.cookies", "w") as jdcookies:
+      jdcookies.write(jdstrcookies)
+    time.sleep(30)
+    sys.exit()
+
+class JDPCCookies():
+  def JDPCLogin(self):
     jdheaders = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
-                 "referer": "https://passport.jd.com"}
+                 "Referer": "https://passport.jd.com"}
     jdgetqr = requests.get("https://qr.m.jd.com/show?appid=133&size=147&t=%s"%(int(time.time()*1000)),
-                           headers=jdheaders,timeout=3)
+                           headers=jdheaders,timeout=5)
     jddiccookies = requests.utils.dict_from_cookiejar(jdgetqr.cookies)
     jdtoken = jddiccookies["wlfstk_smdl"]
     jdlstcookies = []
@@ -149,24 +224,24 @@ class JDCookies():
       jdlstcookies.append(cookie+"="+jddiccookies.get(cookie))
     jdstrcookies = ";".join(jdlstcookies)
  
-    with open("JDQRcode.png", "wb") as qrcode:
-      qrcode.write(jdgetqr.content)
-    print("\n二维码图片 JDQRcode.png 已下载到该目录下,请后台运行程序,电脑打开图片后用京东APP扫码登录\n"\
+    with open("JDPCQRcode.png", "wb") as qrcodeb:
+      qrcodeb.write(jdgetqr.content)
+    print("\n二维码图片 JDPCQRcode.png 已下载到该目录下,请后台运行程序,电脑打开图片后用京东APP扫码登录\n"\
           "手机端操作在提示扫码时选择本地图片即可\n"\
           "Android需要系统更新图库信息才能看到图片,可以选择不删除图片,不然下次又得等系统更新图库信息了\n"\
           "iOS需要先将图片保存到相簿且需要手动清理相簿里的登录二维码,否则很难知道哪个是哪个的\n")
     if sys.platform == "win32":
-        os.system('start "" "JDQRcode.png"')
+      os.system('start "" "JDPCQRcode.png"')
     elif sys.platform == "darwin":
-        os.system('open "JDQRcode.png"')
+      os.system('open "JDPCQRcode.png"')
     else:
-        os.system('xdg-open "JDQRcode.png"')
+      os.system('xdg-open "JDPCQRcode.png"')
 
-    while 1:
-      jdheaders["cookie"] = jdstrcookies
+    while True:
+      jdheaders["Cookie"] = jdstrcookies
       jdcheckqrs = requests.get("https://qr.m.jd.com/check?callback=jQuery%s&appid=133&token=%s&_=%s"\
                                 %(random.randint(1000000,9999999),jdtoken,int(time.time()*1000)),
-                                headers=jdheaders,timeout=3)
+                                headers=jdheaders,timeout=5)
       jdcheckqrj = ast.literal_eval(re.match(r".*({.*}).*",str(jdcheckqrs.text),flags=re.S).group(1))
       if re.findall(r"201|202",str(jdcheckqrj["code"])) != []:
         print(jdcheckqrj["msg"])
@@ -176,7 +251,7 @@ class JDCookies():
         if jdqrcask.lower() == "n":
           GetCookiesExit1()
         else:
-          return self.JDLogin()
+          return self.JDPCLogin()
       elif re.findall(r"ticket",str(jdcheckqrj),flags=re.I) !=[]:
         ticket = jdcheckqrj["ticket"]
         print("登录成功并获取到ticket,正在获取Cookies...\n")
@@ -187,25 +262,26 @@ class JDCookies():
       time.sleep(3)
     time.sleep(1)
 
-  def JDLogined(self):
-    jdheaders,ticket = self.JDLogin()
+  def JDPCLogined(self):
+    jdheaders,ticket = self.JDPCLogin()
     jdlogin = requests.get("https://passport.jd.com/uc/qrCodeTicketValidation?t=%s"%(ticket),
-                           headers=jdheaders,timeout=3)
+                           headers=jdheaders,timeout=5)
     jddiccookies = requests.utils.dict_from_cookiejar(jdlogin.cookies)
     jdlstcookies = []
-    for cookie in jddiccookies:
-      jdlstcookies.append(cookie+"="+jddiccookies.get(cookie))
+    for jdcookie in jddiccookies:
+      jdlstcookies.append(jdcookie+"="+jddiccookies.get(jdcookie))
     jdstrcookies = ";".join(jdlstcookies)
     print("%s Cookies获取成功,将以下内容复制粘贴到需要的地方即可,同时已在该目录下生成一个 .cookies 文件(一般的打开文本类程序即可查看修改),30秒后自动退出程序\n%s"\
           %(jddiccookies["unick"],jdstrcookies))
-    with open(jddiccookies["unick"]+" JDCookies.cookies", "w") as jdcookies:
+    with open(jddiccookies["unick"]+" JDPC.cookies", "w") as jdcookies:
       jdcookies.write(jdstrcookies)
     time.sleep(30)
     sys.exit()
 
 def GetCookiesMain1():
   funcl = ["1 获取联通Cookies",
-           "2 获取京东Cookies"]
+           "2 获取京东手机端Cookies",
+           "3 获取京东PC端Cookies"]
   print("功能选择:\n\n"+"\n\n".join(funcl))
   funcsel = input("\n更多整合等待发现,欢迎回复提供\n\n请输入对应数字然后按确定:")
   if funcsel == "" or funcsel == "0":
@@ -217,7 +293,9 @@ def GetCookiesMain1():
     if int(funcsel) == 1:
       UniCookies().UniLogined()
     elif int(funcsel) == 2:
-      JDCookies().JDLogined()
+      JDMobCookies().JDMobLogined()
+    elif int(funcsel) == 3:
+      JDPCCookies().JDPCLogined()
   else:
     print("请输入仅列出的数字,1秒后重新输入")
     time.sleep(1)
