@@ -2,31 +2,38 @@
 根据对应 系统/版本 ,把每行命令复制到 CMD/终端 执行即可
 
 Windows:
-Python2/3:
+Python3:
 python -m ensurepip
 python -m pip install requests
 python -m pip install rsa
+python -m pip install qrcode
+python -m pip install Pillow
 
 MAC OS: (可能会提示安装 cc 命令工具,安装即可)
-Python2:
-python -m ensurepip
-python -m pip install requests
-python -m pip install rsa
-
 Python3:
 python3 -m ensurepip
 python3 -m pip install requests
 python3 -m pip install rsa
+python3 -m pip install qrcode
+python3 -m pip install Pillow
 
 Ubuntu: (其它Linux系统自行搜索方法)
-Python2:
-sudo apt-get update
-sudo apt-get install python-tk
-sudo apt-get install python-requests
-sudo apt-get install python-rsa
-
 Python3:
 sudo apt-get update
 sudo apt-get install python3-tk
 sudo apt-get install python3-requests
 sudo apt-get install python3-rsa
+sudo apt-get install python3-qrcode
+sudo apt-get install python3-Pillow
+
+Android Termux:
+pkg install python
+pkg install libjpeg-turbo
+python -m pip install requests
+python -m pip install pillow
+python -m pip install qrcode
+
+iOS Pythonista:
+有的模块都自带有,无需额外安装了
+没有的模块需要安装 stash(https://github.com/steljas/stash) 后输入命令:
+pip install rsa
