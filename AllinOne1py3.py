@@ -57,8 +57,8 @@ class Notification():
     else:
       print("企业微信的推送消息发送失败: " + resp["errmsg"])
 
-  def WorkwxnoticMain(self, message):
-    workwxidl = linecache.getline("notic.set", 8).strip().split(".")
+  def WorkwxnoticMain(self, noticsetpath, message):
+    workwxidl = linecache.getline(noticsetpath, 8).strip().split(".")
     corpid = workwxidl[0]
     corpsecret = workwxidl[1]
     agentid = workwxidl[2]
@@ -75,15 +75,16 @@ class Notification():
       access_token = self.getWorkwxtoken(corpid, corpsecret)
     self.sendWorkwxmsg(agentid, access_token, message)
 
-  def BarknoticMain(self, message):
+  def BarknoticMain(self, noticsetpath, message):
     try:
-      barkey = linecache.getline("notic.set", 11).strip()
+      barkey = linecache.getline(noticsetpath, 11).strip()
       requests.get("https://api.day.app/%s/%s" % (barkey, message), timeout=5)
+      print("Bark的推送消息发送成功")
     except Exception:
-      self.BarknoticMain(message)
+      self.BarknoticMain(noticsetpath, message)
 
-  def DingtalknoticMain(self, message):
-    keyword = linecache.getline("notic.set", 14).strip()
+  def DingtalknoticMain(self, noticsetpath, message):
+    keyword = linecache.getline(noticsetpath, 14).strip()
     access_token = linecache.getline("notic.set", 15).strip()
     dingtalkdata = '{"msgtype":"text",' \
                    '"text":{"content": "%s\n%s"}}' % (keyword, message)
@@ -95,21 +96,21 @@ class Notification():
     else:
       print("钉钉的推送消息发送失败: " + resp["errmsg"])
 
-  def NoticMain(self, message):
-    notictype = linecache.getline("notic.set", 5).strip()
+  def NoticMain(self, noticsetpath, message):
+    notictype = linecache.getline(noticsetpath, 5).strip()
     if notictype == "0":
       print("推送通知没有开启哦\n")
     else:
       message = "%s %s" % (time.strftime("%H{}%M{}%S{}").format("时", "分", "秒"), message)
       if notictype == "1":
         print("当前使用 企业微信 推送通知")
-        self.WorkwxnoticMain(message)
+        self.WorkwxnoticMain(noticsetpath, message)
       elif notictype == "2":
         print("当前使用 Bark 推送通知")
-        self.BarknoticMain(message)
+        self.BarknoticMain(noticsetpath, message)
       elif notictype == "3":
         print("当前使用 钉钉 推送通知")
-        self.DingtalknoticMain(message)
+        self.DingtalknoticMain(noticsetpath, message)
 
 class Unifri1():
   def UnifriNetGoods1(self, unifriheaders1, unifriacId):
@@ -180,7 +181,7 @@ class Unifri1():
       return self.UnifriNetGoods1(unifriheaders1, unifriacId)
 
   def UnifriLocalGoods1(self):
-    unifrigoodsid1 = linecache.getline(r"unifri1cfg.set", 29).strip()
+    unifrigoodsid1 = linecache.getline(r"unifri1cfg.set", 32).strip()
     if unifrigoodsid1 == "8a29ac8a72a48dbe0172bb4885430d81":
       unifrigoodsn1 = "美团5元"
       unifripaypri1 = "2.00"
@@ -207,21 +208,24 @@ class Unifri1():
     return unifrigoodsn1, unifrigoodsid1, unifripaypri1, unifrigoodsbt1
 
   def UnifriGettime1(self):
-    try:
-      unifriheaders1 = {
-        "User-Agent": "Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36; unicom{version:android@8.0002}"}
-      # 联通时间接口:https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/getCurrentTimeMillis/v2
-      unifritimes1 = requests.get(
-        "https://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp",
-        headers=unifriheaders1, verify=False, timeout=1).json()["data"]["t"]
-      unifritime1 = time.strftime("%H:%M:%S", time.localtime(int(unifritimes1) / 1000)) + "." + str(unifritimes1)[-3:]
-      return unifritime1
-    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError, ValueError):
-      print(("可能网络出错了, %s 正在重新尝试对时" % (datetime.datetime.now().strftime("%M:%S"))).ljust(50), end="\r")
-      return self.UnifriGettime1()
-    except Exception as err:
-      print(err)
-      return self.UnifriGettime1()
+    if int(linecache.getline(r"unifri1cfg.set", 18).strip()) == 0:
+      unifritime1 = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    else:
+      try:
+        unifriheaders1 = {
+          "User-Agent": "Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36; unicom{version:android@8.0002}"}
+        unifritimes1 = requests.get(
+          "https://m.client.10010.com/welfare-mall-front-activity/mobile/activity/getCurrentTimeMillis/v2",
+          headers=unifriheaders1, verify=False, timeout=1).json()["resdata"]["currentTime"]
+        unifritime1 = time.strftime("%H:%M:%S", time.localtime(unifritimes1 / 1000)) + "." + str(unifritimes1)[-3:]
+        return unifritime1
+      except (requests.exceptions.Timeout, requests.exceptions.ConnectionError, ValueError):
+        print(("可能网络出错了, %s 正在重新尝试对时" % (datetime.datetime.now().strftime("%M:%S"))).ljust(50), end="\r")
+        return self.UnifriGettime1()
+      except Exception as err:
+        print(err)
+        return self.UnifriGettime1()
+    return unifritime1
 
   def UnifriTiming1(self, unifrigoodsbtl1):
     unifrirt1 = []
@@ -231,8 +235,8 @@ class Unifri1():
         unifrirt1.append(timef)
     unifritime1 = self.UnifriGettime1()
     for timef in unifrirt1:
-      unifriet1 = linecache.getline(r"unifri1cfg.set", 22).strip()
-      unifriwm1 = linecache.getline(r"unifri1cfg.set", 20).strip()
+      unifriet1 = linecache.getline(r"unifri1cfg.set", 25).strip()
+      unifriwm1 = linecache.getline(r"unifri1cfg.set", 23).strip()
       unifriwt1 = (datetime.datetime.strptime(timef, "%H:%M:%S.%f") + datetime.timedelta(
         minutes=-int(unifriwm1))).strftime("%H:%M:%S.%f")[:-3]
       unifriwt11 = (datetime.datetime.strptime(timef, "%H:%M:%S.%f") + datetime.timedelta(minutes=-1)).strftime(
@@ -243,18 +247,18 @@ class Unifri1():
         print("请勿关闭,程序将在 %s 开抢" % (timef))
         while unifritime1 > unifriwt1 and unifritime1 < timef:
           if unifritime1 < unifriwt11:
-            print("当前联通的时间是: %s ,每隔30秒刷新时间" % (unifritime1), end="\r")
+            print("当前的时间是: %s ,每隔30秒刷新时间" % (unifritime1), end="\r")
             time.sleep(30)
           else:
-            print("当前联通的时间是: %s ,每隔0.01秒刷新时间" % (unifritime1), end="\r")
+            print("当前的时间是: %s ,每隔0.01秒刷新时间" % (unifritime1), end="\r")
             time.sleep(0.01)
           unifritime1 = self.UnifriGettime1()
 
   def UnifriGetOrderj1(self, unifriheaders1, unifridata1):
     try:
-      unifriorderj1 = requests.get("http://m.client.10010.com/welfare-mall-front/mobile/api/bj2402/v1",
+      unifriorderj1 = requests.get("https://m.client.10010.com/welfare-mall-front/mobile/api/bj2402/v1",
                                    headers=unifriheaders1, params=unifridata1, verify=False,
-                                   timeout=float(linecache.getline(r"unifri1cfg.set", 35).strip())).json()
+                                   timeout=float(linecache.getline(r"unifri1cfg.set", 38).strip())).json()
       return unifriorderj1
     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError, ValueError):
       print(("可能网络出错了, %s 正在重新尝试下单" % (datetime.datetime.now().strftime("%M:%S"))).ljust(50), end="\r")
@@ -282,7 +286,7 @@ class Unifri1():
         os.system('xdg-open "unifricaptcha.jpg"')
       captcha = input("输入验证码(不区分大小写)后按确定:")
       riskr = requests.get(
-        "https://act.10010.com/riskService?appId=%s&method=check&riskCode=image&checkCode=%s" % (
+        "https://act.10010.com/riskService?appId=%s&method=check&riskCode=image&checkCode=%s&systemCode=19991" % (
           r"" + unifriappId, captcha),
         headers=unifriheaders1, verify=False, timeout=5).content.decode("utf-8")
       riskrj = ast.literal_eval(riskr)
@@ -299,9 +303,9 @@ class Unifri1():
       print(err)
       self.UnifriCaptcha(unifriheaders1, unifriappId)
 
-  def UnifriOrdering1(self, unifriaccount, unifriheaders1, unifrigoodsn1, unifridata1):
+  def UnifriOrdering1(self, noticsetpath, unifriaccount, unifriheaders1, unifrigoodsn1, unifridata1):
     try:
-      unifriftime1 = linecache.getline(r"unifri1cfg.set", 32).strip()
+      unifriftime1 = linecache.getline(r"unifri1cfg.set", 35).strip()
       unifriftimes1 = 1
       unifriorderj1 = self.UnifriGetOrderj1(unifriheaders1, unifridata1)
       unifriorders1 = unifriorderj1["msg"]
@@ -334,13 +338,14 @@ class Unifri1():
           print("%s已有订单或不能再次购买该商品\n" % (unifriaccount))
           break
         elif re.findall(r"无法购买请稍候再试", str(unifriorders1)) != [] and int(
-            linecache.getline(r"unifri1cfg.set", 40).strip()) == 0:
+            linecache.getline(r"unifri1cfg.set", 43).strip()) == 0:
           print("%s可能已被限制当天所有活动,请下次再参加\n" % (unifriaccount))
           AllinOneExit1()
-        elif re.findall(r"活动太火爆，请稍后再试", str(unifriorders1)) != [] and int(
-            linecache.getline(r"unifri1cfg.set", 38).strip()) == 1:
+        elif re.findall(r"活动太火爆，请稍后再试|系统开小差了", str(unifriorders1)) != [] and int(
+            linecache.getline(r"unifri1cfg.set", 41).strip()) == 1:
           message = "%s处于半黑状态,需要过一下验证才能继续抢购哦" % (unifriaccount)
-          Notification().NoticMain(message)
+          if noticsetpath != "false":
+            Notification().NoticMain(noticsetpath, message)
           unifriappId = unifriorderj1["resdata"]
           input("%s\n按确定键继续用程序过验证..." % (message))
           self.UnifriCaptcha(unifriheaders1, unifriappId)
@@ -355,23 +360,36 @@ class Unifri1():
         with open(unifriaccount + "的商品 " + unifrigoodsn1 + " " + \
                   time.strftime("%H{}%M{}%S{}").format("时", "分", "秒") + "下单成功.ordered", "w"):
           print("已记录%s的商品:%s 下单成功时间" % (unifriaccount, unifrigoodsn1))
-        Notification().NoticMain(message)
+        if noticsetpath != "false":
+          Notification().NoticMain(noticsetpath, message)
     except KeyboardInterrupt:
       print("用户中断操作")
       AllinOneExit1()
     except Exception as err:
       print(err)
-      self.UnifriOrdering1(unifriaccount, unifriheaders1, unifrigoodsn1, unifridata1)
+      self.UnifriOrdering1(noticsetpath, unifriaccount, unifriheaders1, unifrigoodsn1, unifridata1)
 
   def UnifriMain1(self):
-    unifriaccount = linecache.getline(r"unifri1cfg.set", 43).strip()
+    noticpath = linecache.getline(r"unifri1cfg.set", 52).strip()
+    noticsetpath = noticpath + "/notic.set"
+    try:
+      noticlines = len(open(noticsetpath, errors="ignore", encoding="UTF-8").readlines())
+      if noticlines != 15:
+        print("出错了, notic.set 的行数不对,将无法开启推送通知哦")
+        noticsetpath = "false"
+    except FileNotFoundError:
+      print("该目录下没有 notic.set 文件,将无法开启推送通知哦")
+      noticsetpath = "false"
+    if noticsetpath != "false":
+      linecache.updatecache(noticsetpath)
+    unifriaccount = linecache.getline(r"unifri1cfg.set", 46).strip()
     print("\n正在运行联通超级星期五\n账号为: %s\n" % (unifriaccount))
     unifriheaders1 = {
       "User-Agent": "Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36; unicom{version:android@8.0002}",
       "ContentType": "application/x-www-form-urlencoded;charset=UTF-8",
-      "Cookie": "%s" % (linecache.getline(r"unifri1cfg.set", 46).strip())}
+      "Cookie": "%s" % (linecache.getline(r"unifri1cfg.set", 49).strip())}
     unifriacId = linecache.getline(r"unifri1cfg.set", 15).strip()
-    if int(linecache.getline(r"unifri1cfg.set", 27).strip()) == 1:
+    if int(linecache.getline(r"unifri1cfg.set", 30).strip()) == 1:
       unifrigoodsn1, unifrigoodsid1, unifripaypri1, unifrigoodsbt1 = self.UnifriLocalGoods1()
       unifrigoodsq1 = requests.get(
         "https://m.client.10010.com/welfare-mall-front-activity/super/five/get619Activity/v1?acId=%s" % (unifriacId),
@@ -403,9 +421,9 @@ class Unifri1():
                         unifrigoodsid1, unifripaypri1, unifrigoodsbt1, unifriacId)
     unifriask = input("一次下单不成功后是否需要捡漏,是 输入 y 后按确定,否 直接按确定(多选后务必输入 y ):")
     if unifriask.lower() == "y":
-      if int(linecache.getline(r"unifri1cfg.set", 18).strip()) == 1:
+      if int(linecache.getline(r"unifri1cfg.set", 21).strip()) == 1:
         self.UnifriTiming1(unifrigoodsbtl1)
-        time.sleep(float(linecache.getline(r"unifri1cfg.set", 24).strip()))
+        time.sleep(float(linecache.getline(r"unifri1cfg.set", 27).strip()))
       try:
         unifrigoodsbt1 = unifrigoodsbtl1[0]
         for i in range(0, len(unifrimultigoodsl1), 3):
@@ -416,7 +434,7 @@ class Unifri1():
                         '"FLSC_PREFECTURE":"SUPER_FRIDAY","launchId":"","platAcId":"%s"}' % (
                           unifrimultigoodsl1[i + 1], unifrimultigoodsl1[i + 2], unifrigoodsbt1, unifriacId)
           self.UnifriGetOrderj1(unifriheaders1, unifridata1)
-          time.sleep(float(linecache.getline(r"unifri1cfg.set", 32).strip()))
+          time.sleep(float(linecache.getline(r"unifri1cfg.set", 35).strip()))
         unifriwporderj1 = requests.get("https://m.client.10010.com/welfare-mall-front/mobile/api/bj2404/v1",
                                        headers=unifriheaders1,
                                        params='reqsn=&reqtime=&cliver=&reqdata={"orderState":"00","start":"1","limit":10}',
@@ -430,7 +448,8 @@ class Unifri1():
             message = "%s %s 已成功抢购,待支付中,请尽快支付,否则逾期将失效哦" % (
               unifriaccount, unifrimultigoodsl1[unifrimultigoodsl1.index(i) - 1])
             print(message)
-            Notification().NoticMain(message)
+            if noticsetpath != "false":
+              Notification().NoticMain(noticsetpath, message)
             try:
               del unifrimultigoodsl1[unifrimultigoodsl1.index(i) - 1:unifrimultigoodsl1.index(i) + 2]
             except ValueError:
@@ -444,14 +463,14 @@ class Unifri1():
                         '"sign":"","oneid":"","twoid":"","threeid":"","maxcash":"","floortype":"undefined",' \
                         '"FLSC_PREFECTURE":"SUPER_FRIDAY","launchId":"","platAcId":"%s"}' % (
                           unifrimultigoodsl1[i + 1], unifrimultigoodsl1[i + 2], unifrigoodsbt1, unifriacId)
-          self.UnifriOrdering1(unifriaccount, unifriheaders1, unifrigoodsn1, unifridata1)
+          self.UnifriOrdering1(noticsetpath, unifriaccount, unifriheaders1, unifrigoodsn1, unifridata1)
       except UnboundLocalError:
-        self.UnifriOrdering1(unifriaccount, unifriheaders1, unifrigoodsn1, unifridata1)
+        self.UnifriOrdering1(noticsetpath, unifriaccount, unifriheaders1, unifrigoodsn1, unifridata1)
     else:
       try:
-        if int(linecache.getline(r"unifri1cfg.set", 18).strip()) == 1:
+        if int(linecache.getline(r"unifri1cfg.set", 21).strip()) == 1:
           self.UnifriTiming1(unifrigoodsbtl1)
-          time.sleep(float(linecache.getline(r"unifri1cfg.set", 24).strip()))
+          time.sleep(float(linecache.getline(r"unifri1cfg.set", 27).strip()))
         unifriorderj1 = self.UnifriGetOrderj1(unifriheaders1, unifridata1)
         unifriorders1 = unifriorderj1["msg"]
         if re.findall(r"下单成功", str(unifriorders1)) != []:
@@ -460,9 +479,10 @@ class Unifri1():
           with open(unifriaccount + "的商品 " + unifrigoodsn1 + " " + \
                     time.strftime("%H{}%M{}%S{}").format("时", "分", "秒") + "下单成功.ordered", "w"):
             print("已记录%s的商品:%s 下单成功时间" % (unifriaccount, unifrigoodsn1))
-          Notification().NoticMain(message)
+          if noticsetpath != "false":
+            Notification().NoticMain(noticsetpath, message)
           time.sleep(10)
-        elif re.findall(r"活动太火爆，请稍后再试", str(unifriorders1)) != []:
+        elif re.findall(r"活动太火爆，请稍后再试|系统开小差了", str(unifriorders1)) != []:
           unifriappId = unifriorderj1["resdata"]
           input("账号处于半黑状态,需要过一下验证才能继续抢购哦\n按确定键继续用程序过验证...")
           self.UnifriCaptcha(unifriheaders1, unifriappId)
@@ -556,6 +576,18 @@ class JDCoupon1():
       self.JDCGetting1(jdcpactid1, jdcpkeyid1, jdcproleid1, jdheaders1)
 
   def JDCouponMain1(self):
+    noticpath = linecache.getline(r"jdgetc1cfg.set", 28).strip()
+    noticsetpath = noticpath + "/notic.set"
+    try:
+      noticlines = len(open(noticsetpath, errors="ignore", encoding="UTF-8").readlines())
+      if noticlines != 15:
+        print("出错了, notic.set 的行数不对,将无法开启推送通知哦")
+        noticsetpath = "false"
+    except FileNotFoundError:
+      print("该目录下没有 notic.set 文件,将无法开启推送通知哦")
+      noticsetpath = "false"
+    if noticsetpath != "false":
+      linecache.updatecache(noticsetpath)
     print("\n正在运行京东抢任意优惠券\n")
     jdheaders1 = {
       "User-Agent": "Mozilla/5.0 (Linux;Android 10;GM1910) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36",
@@ -596,7 +628,8 @@ class JDCoupon1():
     with open("JDCoupon1的优惠券 " + jdcpkeyid1 + " " + \
               time.strftime("%H{}%M{}%S{}").format("时", "分", "秒") + "抢券成功.rushed", "w"):
       print("已记录JDCoupon1的优惠券:%s 抢券成功时间" % (jdcpkeyid1))
-    Notification().NoticMain(message)
+    if noticsetpath != "false":
+      Notification().NoticMain(noticsetpath, message)
     AllinOneExit1()
 
 def AllinOneMain1():
@@ -621,16 +654,8 @@ def AllinOneMain1():
     AllinOneMain1()
 
 try:
-  noticlines1 = len(open(r"notic.set", errors="ignore", encoding="UTF-8").readlines())
-  if noticlines1 != 15:
-    print("出错了, notic.set 的行数不对哦")
-    AllinOneExit1()
-except FileNotFoundError:
-  print("出错了,该目录下没有 notic.set 文件哦")
-  AllinOneExit1()
-try:
   unifrilines1 = len(open(r"unifri1cfg.set", errors="ignore", encoding="UTF-8").readlines())
-  if unifrilines1 != 46:
+  if unifrilines1 != 52:
     print("出错了, unifri1cfg.set 的行数不对哦")
     AllinOneExit1()
 except FileNotFoundError:
@@ -638,18 +663,17 @@ except FileNotFoundError:
   AllinOneExit1()
 try:
   jdgetclines1 = len(open(r"jdgetc1cfg.set", errors="ignore", encoding="UTF-8").readlines())
-  if jdgetclines1 != 25:
+  if jdgetclines1 != 28:
     print("出错了, jdgetc1cfg.set 的行数不对哦")
     AllinOneExit1()
 except FileNotFoundError:
   print("出错了,该目录下没有 jdgetc1cfg.set 文件哦")
   AllinOneExit1()
-linecache.updatecache("notic.set")
 linecache.updatecache("unifri1cfg.set")
 linecache.updatecache("jdgetc1cfg.set")
 
 try:
-  codedatenow = datetime.datetime.strptime("2021-4-2 19:00", "%Y-%m-%d %H:%M")
+  codedatenow = datetime.datetime.strptime("2021-4-16 18:15", "%Y-%m-%d %H:%M")
   codeversionj = requests.get("https://raw.githubusercontent.com/pujie1216/RushCoupon/master/codeversion.json",
                               timeout=5).json()
   codedatenew = datetime.datetime.strptime(codeversionj["codedate"], "%Y-%m-%d %H:%M")
